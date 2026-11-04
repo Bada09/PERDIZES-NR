@@ -1,0 +1,2076 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LAVAÍ — Relatório PUQ Perdizes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+:root {
+  --bg-body: #f4f7fb;
+  --bg-card: rgba(15, 23, 42, 0.552);
+  --bg-card-hover: #ffffff;
+  --bg-card-solid: #ffffff;
+  --bg-input: #ffffff;
+  --border: #e2e8f0;
+  --border-focus: rgba(14, 165, 233, 0.55);
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #94a3b8;
+
+  --primary: #0ea5e9;
+  --primary-glow: rgba(14, 165, 233, 0.22);
+  --secondary: #6366f1;
+  --secondary-glow: rgba(99, 102, 241, 0.2);
+  --accent-repasse: #059669;
+  --accent-repasse-glow: rgba(5, 150, 105, 0.2);
+  --warning: #d97706;
+  --danger: #dc2626;
+  --wash-color: #2563eb;
+  --dry-color: #db2777;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 14px rgba(15, 23, 42, 0.05);
+  --shadow-glow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 24px;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.10) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(14, 165, 233, 0.08) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+.container {
+  max-width: 1540px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── LOADER ── */
+.loader-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(244, 247, 251, 0.94);
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+.loader-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+.loader-spinner {
+  width: 58px;
+  height: 58px;
+  border: 4px solid rgba(99, 102, 241, 0.15);
+  border-top-color: var(--primary);
+  border-right-color: var(--accent-repasse);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  box-shadow: 0 0 25px var(--primary-glow);
+}
+.loader-text {
+  margin-top: 18px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── HEADER ── */
+.header-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+.header-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent-repasse));
+}
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.brand-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #0284c7, #0284c7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #fff;
+  box-shadow: 0 6px 18px var(--primary-glow);
+}
+.brand-text h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.brand-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.brand-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.badge-fixed-rate {
+  background: rgba(99, 102, 241, 0.15);
+  color: #4f46e5;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 12px;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.btn-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  background: rgba(15, 23, 42, 0.030);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.btn-nav:hover {
+  background: rgba(15, 23, 42, 0.060);
+  border-color: rgba(15, 23, 42, 0.120);
+  transform: translateY(-1px);
+}
+.btn-export-excel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, #059669, #10b981);
+  border: none;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+  transition: all 0.2s ease;
+}
+.btn-export-excel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+  filter: brightness(1.08);
+}
+.btn-export-excel:active {
+  transform: translateY(0);
+}
+
+/* ── FILTERS CARD ── */
+.filters-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.filters-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 160px;
+}
+.filter-item label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.filter-input, .filter-select {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  color: var(--text-main);
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+.filter-input:focus, .filter-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+.quick-period-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.btn-pill {
+  background: rgba(15, 23, 42, 0.024);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.btn-pill:hover {
+  background: rgba(15, 23, 42, 0.048);
+  color: var(--text-main);
+}
+.btn-pill.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 2px 10px var(--primary-glow);
+}
+
+/* ── KPI SECTION ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+.kpi-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(15, 23, 42, 0.096);
+}
+.kpi-card.highlight-repasse {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.03));
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
+}
+.kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.kpi-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+}
+.kpi-icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.030);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--text-muted);
+}
+.kpi-card.highlight-repasse .kpi-icon-box {
+  background: rgba(16, 185, 129, 0.2);
+  color: #059669;
+}
+.kpi-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text-main);
+}
+.kpi-card.highlight-repasse .kpi-value {
+  color: #059669;
+  text-shadow: 0 0 20px rgba(52, 211, 153, 0.3);
+}
+.kpi-footer {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── CONDOMINIUM SUMMARY BOXES ── */
+.condo-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 20px;
+}
+.condo-box {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.condo-box.yougo {
+  border-left: 4px solid var(--primary);
+}
+.condo-box.puq {
+  border-left: 4px solid var(--secondary);
+}
+.condo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.condo-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.condo-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 800;
+}
+.condo-box.yougo .condo-avatar {
+  background: rgba(99, 102, 241, 0.2);
+  color: #4f46e5;
+}
+.condo-box.puq .condo-avatar {
+  background: rgba(14, 165, 233, 0.2);
+  color: #0284c7;
+}
+.condo-title {
+  font-size: 17px;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+}
+.condo-loc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.condo-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  background: #f1f5f9;
+  border-radius: var(--radius-sm);
+  padding: 14px;
+}
+.condo-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.condo-stat-lbl {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.condo-stat-val {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+  font-family: 'Outfit', sans-serif;
+}
+.condo-repasse-val {
+  color: #059669;
+}
+.condo-cycles-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.progress-bar-wrap {
+  height: 8px;
+  background: rgba(15, 23, 42, 0.036);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+}
+.progress-fill-wash {
+  background: var(--wash-color);
+  height: 100%;
+}
+.progress-fill-dry {
+  background: var(--dry-color);
+  height: 100%;
+}
+
+/* ── CHARTS SECTION ── */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 1080px) {
+  .charts-grid { grid-template-columns: 1fr; }
+}
+.chart-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.chart-title {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── ANALYTIC TABLE SECTION ── */
+.table-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: var(--shadow-sm);
+}
+.table-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.table-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.table-title {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+}
+.table-count-badge {
+  background: rgba(99, 102, 241, 0.15);
+  color: #4f46e5;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.search-input-wrap {
+  position: relative;
+  min-width: 260px;
+}
+.search-input-wrap i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  font-size: 13px;
+}
+.search-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px 8px 34px;
+  color: var(--text-main);
+  font-size: 13px;
+  width: 100%;
+  outline: none;
+  transition: all 0.2s ease;
+}
+.search-input:focus {
+  border-color: var(--primary);
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+.custom-table th {
+  background: #f1f5f9;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.custom-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.024);
+  color: var(--text-main);
+  white-space: nowrap;
+}
+.custom-table tr:hover td {
+  background: rgba(15, 23, 42, 0.018);
+}
+
+/* Badges */
+.badge-machine {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.badge-wash {
+  background: rgba(59, 130, 246, 0.15);
+  color: #2563eb;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+.badge-dry {
+  background: rgba(236, 72, 153, 0.15);
+  color: #db2777;
+  border: 1px solid rgba(236, 72, 153, 0.3);
+}
+.badge-condo {
+  font-weight: 600;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.badge-condo.yougo { color: #4f46e5; }
+.badge-condo.puq { color: #0284c7; }
+
+.badge-repasse-val {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.cell-morador {
+  font-weight: 600;
+  color: #0f172a;
+}
+.cell-apto {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: #b45309;
+  background: rgba(251, 191, 36, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* ── PAGINATION ── */
+.table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 4px;
+}
+.pagination-info {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-page {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  min-width: 34px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.btn-page:hover:not(:disabled) {
+  background: rgba(15, 23, 42, 0.060);
+  border-color: rgba(15, 23, 42, 0.120);
+}
+.btn-page.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.btn-page:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── CONSOLIDATED TABLE ── */
+.consolidated-table-wrap {
+  margin-top: 6px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  body { padding: 14px; }
+  .header-card { flex-direction: column; align-items: flex-start; }
+  .header-actions { width: 100%; justify-content: space-between; }
+  .filters-row { flex-direction: column; }
+  .filter-item { width: 100%; }
+}
+
+/* ── Complementos do relatório PUQ ── */
+.condo-tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(14,165,233,.12);color:#0369a1;border:1px solid rgba(14,165,233,.3);text-transform:uppercase;letter-spacing:.5px}
+.kpi-grid.six{grid-template-columns:repeat(3,1fr)}
+@media (max-width: 900px){.kpi-grid.six{grid-template-columns:repeat(2,1fr)}}
+@media (max-width: 560px){.kpi-grid.six{grid-template-columns:1fr}}
+.var-up{color:#059669;font-weight:700}.var-down{color:#dc2626;font-weight:700}.var-flat{color:var(--text-dim)}
+.rank-pos{display:inline-flex;width:26px;height:26px;border-radius:8px;align-items:center;justify-content:center;font-weight:800;font-size:12px;background:#f1f5f9;color:var(--text-muted)}
+.rank-pos.top{background:rgba(14,165,233,.14);color:#0369a1}
+.bar-mini{height:6px;border-radius:4px;background:#e2e8f0;overflow:hidden;min-width:90px}
+.bar-mini>span{display:block;height:100%;background:linear-gradient(90deg,#38bdf8,#0284c7)}
+.total-row td{background:#f8fafc;font-weight:800;border-top:2px solid var(--border)}
+.period-note{font-size:12px;color:var(--text-muted)}
+.btn-print{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:var(--radius-sm);border:1px solid var(--border);background:#fff;color:var(--text-main);font-weight:600;font-size:13px;cursor:pointer}
+.btn-print:hover{border-color:var(--primary);color:#0369a1}
+.segment-bar{display:flex;gap:6px;padding:5px;background:#eef2f7;border-radius:12px;width:fit-content;flex-wrap:wrap}
+.btn-seg{border:0;background:transparent;padding:9px 18px;border-radius:9px;font-weight:700;font-size:13px;color:var(--text-muted);cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .15s}
+.btn-seg:hover{color:var(--text-main)}
+.btn-seg.active{background:#fff;color:#0369a1;box-shadow:0 1px 3px rgba(15,23,42,.12)}
+.btn-seg[data-seg="NR"].active{color:#b45309}
+.btn-seg[data-seg="ALL"].active{color:#4f46e5}
+.btn-seg .seg-count{font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;background:#f1f5f9;color:var(--text-muted)}
+.segment-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.nr-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:4px 0 16px}
+.nr-stat{border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:#fff}
+.nr-stat .lbl{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:.4px}
+.nr-stat .val{font-family:'Outfit',sans-serif;font-size:22px;font-weight:700;margin-top:4px}
+.nr-st{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.nr-st.exato{background:rgba(5,150,105,.12);color:#047857}
+.nr-st.aprox{background:rgba(14,165,233,.12);color:#0369a1}
+.nr-st.inc{background:rgba(217,119,6,.12);color:#b45309}
+.badge-nr{display:inline-block;margin-left:6px;font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px;background:rgba(217,119,6,.12);color:#b45309;border:1px solid rgba(217,119,6,.3)}
+@media print{.segment-bar{display:none}}
+.custom-table td,.custom-table th{color:var(--text-main)}
+.kpi-card,.chart-card,.table-card,.filters-card,.header-card{background:#fff}
+@media print{
+  body{background:#fff;padding:0}
+  .filters-card,.header-actions,.table-actions,.table-pagination,.no-print{display:none!important}
+  .kpi-card,.chart-card,.table-card,.header-card{box-shadow:none;break-inside:avoid}
+  .container{gap:14px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader" class="loader-overlay">
+  <div class="loader-spinner"></div>
+  <div class="loader-text">Carregando o histórico do PUQ Perdizes...</div>
+</div>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header class="header-card">
+    <div class="brand-wrapper">
+      <div class="brand-icon"><i class="fas fa-building-user"></i></div>
+      <div class="brand-text">
+        <h1><span id="titulo-seg">PUQ Perdizes</span> <span class="condo-tag">Histórico completo</span></h1>
+        <div class="brand-subtitle">
+          <span><i class="fas fa-location-dot"></i> 31# Gestão PUQ - Perdizes • 3 Stacks • Fonte: VendTEF</span>
+          <span class="badge-fixed-rate"><i class="fas fa-coins"></i> Repasse R$ 2,00 / operação</span>
+          <span class="period-note" id="periodo-dados">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <a href="repasse_condominios.html" class="btn-nav"><i class="fas fa-arrow-left"></i> Repasse Condomínios</a>
+      <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> Imprimir / PDF</button>
+      <button class="btn-export-excel" onclick="exportRelatorioExcel()"><i class="fas fa-file-excel"></i> Exportar Excel</button>
+    </div>
+  </header>
+
+  <!-- FILTERS -->
+  <section class="filters-card">
+    <div class="segment-row">
+      <div class="segment-bar" id="segment-bar">
+        <button class="btn-seg active" data-seg="PUQ" onclick="setSegment('PUQ')"><i class="fas fa-building-user"></i> PUQ Perdizes <span class="seg-count" id="seg-count-PUQ">0</span></button>
+        <button class="btn-seg" data-seg="NR" onclick="setSegment('NR')"><i class="fas fa-user-tag"></i> NR <span class="seg-count" id="seg-count-NR">0</span></button>
+        <button class="btn-seg" data-seg="ALL" onclick="setSegment('ALL')"><i class="fas fa-layer-group"></i> Consolidado <span class="seg-count" id="seg-count-ALL">0</span></button>
+      </div>
+      <span class="period-note" id="seg-desc">Operações regulares do condomínio (sem NR)</span>
+    </div>
+    <div class="filters-row">
+      <div class="filter-item" style="max-width: 220px;">
+        <label><i class="fas fa-soap"></i> Tipo de Máquina</label>
+        <select id="filter-maq-type" class="filter-select" onchange="applyFilters()">
+          <option value="all">Todas as Operações</option>
+          <option value="wash">Apenas Lavadoras</option>
+          <option value="dry">Apenas Secadoras</option>
+        </select>
+      </div>
+      <div class="filter-item" style="max-width: 170px;">
+        <label><i class="fas fa-calendar-day"></i> De</label>
+        <input type="text" id="date-start" class="filter-input" placeholder="dd/mm/aaaa">
+      </div>
+      <div class="filter-item" style="max-width: 170px;">
+        <label><i class="fas fa-calendar-day"></i> Até</label>
+        <input type="text" id="date-end" class="filter-input" placeholder="dd/mm/aaaa">
+      </div>
+      <div class="filter-item" style="max-width: 120px; align-self: flex-end;">
+        <button class="btn-nav" style="width: 100%; justify-content: center; padding: 10px;" onclick="resetFilters()">
+          <i class="fas fa-rotate-left"></i> Limpar
+        </button>
+      </div>
+    </div>
+    <div class="quick-period-pills" id="quick-pills">
+      <span style="font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; margin-right: 6px;">Atalhos:</span>
+      <button class="btn-pill active" data-period="all" onclick="setQuickPeriod('all')">Todo o Histórico</button>
+      <button class="btn-pill" data-period="this_month" onclick="setQuickPeriod('this_month')">Este Mês</button>
+      <button class="btn-pill" data-period="last_month" onclick="setQuickPeriod('last_month')">Mês Passado</button>
+      <button class="btn-pill" data-period="12m" onclick="setQuickPeriod('12m')">Últimos 12 meses</button>
+      <!-- anos inseridos dinamicamente -->
+    </div>
+  </section>
+
+  <!-- KPI CARDS -->
+  <section class="kpi-grid six">
+    <div class="kpi-card highlight-repasse">
+      <div class="kpi-header">
+        <span class="kpi-title">Repasse ao Condomínio</span>
+        <div class="kpi-icon-box"><i class="fas fa-hand-holding-dollar"></i></div>
+      </div>
+      <div class="kpi-value" id="kpi-repasse">R$ 0,00</div>
+      <div class="kpi-footer"><i class="fas fa-check-circle" style="color:#059669"></i><span id="kpi-repasse-sub">R$ 2,00 por operação paga</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <span class="kpi-title">Operações / Ciclos</span>
+        <div class="kpi-icon-box"><i class="fas fa-rotate"></i></div>
+      </div>
+      <div class="kpi-value" id="kpi-ops">0</div>
+      <div class="kpi-footer"><span id="kpi-ops-sub">0 lavagens • 0 secagens</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <span class="kpi-title">Faturamento Bruto</span>
+        <div class="kpi-icon-box"><i class="fas fa-wallet"></i></div>
+      </div>
+      <div class="kpi-value" id="kpi-fat">R$ 0,00</div>
+      <div class="kpi-footer"><span id="kpi-fat-sub">Ticket médio R$ 0,00</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <span class="kpi-title">Média Mensal de Repasse</span>
+        <div class="kpi-icon-box"><i class="fas fa-calendar-check"></i></div>
+      </div>
+      <div class="kpi-value" id="kpi-media">R$ 0,00</div>
+      <div class="kpi-footer"><span id="kpi-media-sub">0 meses com operação</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <span class="kpi-title">Melhor Mês</span>
+        <div class="kpi-icon-box"><i class="fas fa-trophy"></i></div>
+      </div>
+      <div class="kpi-value" id="kpi-best">—</div>
+      <div class="kpi-footer"><span id="kpi-best-sub">—</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <span class="kpi-title">Consumo Total de Químicos</span>
+        <div class="kpi-icon-box"><i class="fas fa-flask"></i></div>
+      </div>
+      <div class="kpi-value" id="kpi-quimicos">0 L</div>
+      <div class="kpi-footer"><span id="kpi-quimicos-sub">0 L detergente • 0 L amaciante</span></div>
+    </div>
+  </section>
+
+  <!-- CHARTS -->
+  <section class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title"><i class="fas fa-chart-column" style="color: var(--primary);"></i> Evolução Mensal — Repasse (R$) e Operações</div>
+      </div>
+      <div id="chart-timeline" style="min-height: 330px;"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title"><i class="fas fa-chart-pie" style="color: var(--secondary);"></i> Lavagens × Secagens</div>
+      </div>
+      <div id="chart-mix" style="min-height: 330px;"></div>
+    </div>
+  </section>
+
+  <!-- HISTÓRICO MENSAL -->
+  <section class="table-card">
+    <div class="table-top-bar">
+      <div class="table-title-wrap">
+        <i class="fas fa-calendar-days" style="color: var(--primary);"></i>
+        <div class="table-title">Histórico Mensal de Repasse</div>
+        <span class="table-count-badge" id="mensal-count">0 meses</span>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="custom-table" id="mensal-table">
+        <thead>
+          <tr>
+            <th>Mês</th><th>Lavagens</th><th>Secagens</th><th>Operações</th>
+            <th>Faturamento Bruto</th><th>Repasse</th>
+          </tr>
+        </thead>
+        <tbody id="mensal-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- CONCILIAÇÃO NR -->
+  <section class="table-card" id="nr-panel">
+    <div class="table-top-bar">
+      <div class="table-title-wrap">
+        <i class="fas fa-code-compare" style="color:#d97706"></i>
+        <div class="table-title">Cruzamento NR — Planilha ERP Vending × VendTEF</div>
+        <span class="table-count-badge" id="nr-total-badge">0 operações</span>
+      </div>
+      <div class="table-actions">
+        <select id="nr-status-filter" class="filter-select" style="width:auto" onchange="renderNRTable()">
+          <option value="all">Todas</option>
+          <option value="Casada (horário exato)">Casadas (horário exato)</option>
+          <option value="Casada (±2 min)">Casadas (±2 min)</option>
+          <option value="Incluída (sem par no VendTEF)">Incluídas (sem par no VendTEF)</option>
+        </select>
+        <button class="btn-nav" onclick="exportNRExcel()"><i class="fas fa-download"></i> Exportar cruzamento</button>
+      </div>
+    </div>
+    <div class="nr-stats" id="nr-stats"></div>
+    <div class="table-responsive" style="max-height:420px;overflow:auto">
+      <table class="custom-table">
+        <thead><tr><th>Status</th><th>Data</th><th>Hora planilha</th><th>Hora VendTEF</th><th>Δ seg</th><th>Tipo</th><th>Usuário (planilha)</th><th>Morador (VendTEF)</th><th>Valor</th></tr></thead>
+        <tbody id="nr-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- EXTRATO -->
+  <section class="table-card">
+    <div class="table-top-bar">
+      <div class="table-title-wrap">
+        <i class="fas fa-receipt" style="color: var(--accent-repasse);"></i>
+        <div class="table-title">Extrato Analítico de Transações</div>
+        <span class="table-count-badge" id="table-total-count">0 registros</span>
+      </div>
+      <div class="table-actions">
+        <div class="search-input-wrap">
+          <i class="fas fa-magnifying-glass"></i>
+          <input type="text" id="search-resident" class="search-input" placeholder="Buscar morador, apto ou data..." oninput="applyFilters()">
+        </div>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="custom-table" id="analytic-table">
+        <thead>
+          <tr><th>Data</th><th>Hora</th><th>Tipo</th><th>Morador</th><th>Apartamento</th><th>Valor</th><th>Repasse</th><th>Pagamento</th></tr>
+        </thead>
+        <tbody id="analytic-tbody"></tbody>
+      </table>
+    </div>
+    <div class="table-pagination">
+      <div class="pagination-info" id="pagination-info">Mostrando 0 a 0 de 0 operações</div>
+      <div class="pagination-controls" id="pagination-controls"></div>
+    </div>
+  </section>
+
+  <div class="period-note" style="text-align:center;padding-bottom:12px">LAVAÍ • Relatório gerado em <span id="gerado-em"></span></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// CONSTANTES E CONFIGURAÇÕES DE REPASSE
+// ══════════════════════════════════════════════════════
+const REPASSE_VALOR_UNITARIO = 2.00; // R$ 2,00 por operação
+const ML_DETERGENTE_POR_LAVAGEM = 50;
+const ML_AMACIANTE_POR_LAVAGEM = 60;
+
+const YOU_GO_PDV = '34# Gestão You Go Vila Mariana';
+const PUQ_PDV = '31# Gestão PUQ - Perdizes';
+
+const MATRICULAS_YOU_GO = {
+  '359476934': { torre: 'You Go 1', maquina: 'Lavadora' },
+  '707316858': { torre: 'You Go 1', maquina: 'Secadora' },
+  '359479550': { torre: 'You Go 2', maquina: 'Lavadora' },
+  '707317086': { torre: 'You Go 2', maquina: 'Secadora' },
+  '707317126': { torre: 'You Go 3', maquina: 'Lavadora' },
+  '707317098': { torre: 'You Go 3', maquina: 'Secadora' }
+};
+
+const MOLA_TIPO_MAP = {
+  '1': 'wash',
+  '5931': 'wash',
+  '6673': 'dry',
+  '7008': 'wash',
+  '7009': 'dry',
+  '7038': 'wash',
+  '8872': 'dry',
+  '11538': 'wash',
+  '11539': 'dry',
+  '11546': 'wash',
+  '11547': 'dry',
+  '11551': 'wash',
+  '11552': 'dry',
+  '11553': 'wash',
+  '11554': 'dry',
+  '19973': 'wash',
+  '25004': 'wash',
+  '25005': 'dry',
+  '25006': 'wash',
+  '25007': 'dry',
+  '25084': 'wash',
+  '25085': 'dry',
+  '25343': 'wash',
+  '25344': 'dry',
+  '25345': 'wash',
+  '25469': 'wash',
+  '25472': 'dry',
+  '25474': 'wash',
+  '26489': 'wash',
+  '26490': 'dry'
+};
+
+// ══════════════════════════════════════════════════════
+// ESTADO GLOBAL
+// ══════════════════════════════════════════════════════
+let rawTransactions = [];
+let filteredTransactions = [];
+let currentPage = 1;
+const pageSize = 20;
+
+let fpStart = null, fpEnd = null;
+let chartTimeline = null, chartMix = null;
+
+// ══════════════════════════════════════════════════════
+// CARREGAMENTO E PROCESSAMENTO DE DADOS
+// ══════════════════════════════════════════════════════
+async function initDashboard() {
+  showLoader(true);
+  try {
+    await loadDataSources();
+    initFlatpickr();
+    buildYearPills();
+    updatePeriodoDados();
+    applyFilters();
+  } catch (err) {
+    console.error('Erro ao inicializar dashboard:', err);
+    alert('Ocorreu um erro ao carregar os dados locais: ' + err.message);
+  } finally {
+    showLoader(false);
+  }
+}
+
+function showLoader(show) {
+  const el = document.getElementById('loader');
+  if (el) {
+    if (show) el.classList.remove('hidden');
+    else el.classList.add('hidden');
+  }
+}
+
+async function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    const isLocal = window.location.protocol === 'file:';
+    s.src = isLocal ? src : (src + '?v=' + Date.now());
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function tryLoad(varName, src) {
+  if (!window[varName]) {
+    try { await loadScript(src); } catch(e) {}
+  }
+}
+
+function parseCSV(csvText) {
+  if (!csvText) return [];
+  const lines = csvText.split('\n');
+  const result = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    
+    // Tratamento de aspas e ponto-e-vírgula
+    const row = [];
+    let cur = '', inQuotes = false;
+    for (let c = 0; c < line.length; c++) {
+      const ch = line[c];
+      if (ch === '"') {
+        inQuotes = !inQuotes;
+      } else if (ch === ';' && !inQuotes) {
+        row.push(cur.trim());
+        cur = '';
+      } else {
+        cur += ch;
+      }
+    }
+    row.push(cur.trim());
+    result.push(row);
+  }
+  return result;
+}
+
+// ══════════════════════════════════════════════════════
+// MOTOR DE IDENTIFICAÇÃO DE MORADORES E APARTAMENTOS (YOU GO & CONDOMÍNIOS)
+// ══════════════════════════════════════════════════════
+function cleanStrResident(s) {
+  if (!s) return '';
+  return String(s)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+
+function tokenizeResident(name) {
+  const clean = cleanStrResident(name).toLowerCase().replace(/[^a-z0-9\s]/g, ' ');
+  const stopWords = new Set(['de', 'da', 'do', 'dos', 'das', 'e', 'em', 'para', 'com']);
+  return clean.split(/\s+/).filter(t => t.length > 1 && !stopWords.has(t));
+}
+
+// Extração direta de morador e apartamento via regex estrito com word boundary
+function extractDirectUserAndApt(userRaw, nsuRaw) {
+  let user = (userRaw || '').trim();
+  let nsu = (nsuRaw || '').trim();
+  if (!user && !nsu) return { name: 'Não Identificado', apt: '' };
+
+  let morador = user;
+  let apt = '';
+
+  // 1. Verifica no campo usuário (ex: "GLAUCIO PINHEIRO DE ARAUJO apto - 17", "Silvia - Apt 87", "RODRIGO apto 163")
+  const aptRegex = /[\s\-–,.:]+(?:\b(?:apto|apt|ap|apartamento|unidade|bloco|apot)\b)[\s\-–.:#]*([a-zA-Z0-9]+(?:\s*[a-zA-Z])?)/i;
+  const match = user.match(aptRegex);
+  if (match) {
+    apt = match[1].trim();
+    morador = user.substring(0, match.index).trim();
+  } else {
+    // 2. Verifica se o usuário termina com hífen + número (ex: "Nome - 122")
+    const mHyphen = user.match(/[\s\-–,.:]+\-\s*([0-9]{1,4}[a-zA-Z]?)$/);
+    if (mHyphen) {
+      apt = mHyphen[1].trim();
+      morador = user.substring(0, mHyphen.index).trim();
+    } else {
+      // 3. Verifica no NSU (muito comum no PayBlu)
+      const nsuMatch = nsu.match(/(?:\b(?:apto|apt|ap|apartamento|unidade|bloco|apot)\b)[\s\-–.:#]*([a-zA-Z0-9]+)/i);
+      if (nsuMatch) {
+        apt = nsuMatch[1].trim();
+        morador = user;
+      }
+    }
+  }
+
+  // Limpa pontuações residuais no nome do morador
+  morador = morador.replace(/[\s\-–,.:]+$/, '').trim();
+  if (apt) {
+    apt = apt.replace(/^(?:apto|apt|ap|apartamento|unidade|bloco|apot)[\s\-–.:#]*/i, '').trim();
+  }
+
+  return {
+    name: morador || user || 'Não Identificado',
+    apt: apt || ''
+  };
+}
+
+// Dicionário e índice mestre de apartamentos (acumulado de todas as transações)
+const MASTER_RESIDENT_APT_MAP = {};      // normName -> apt (ex: "glaucio pinheiro de araujo" -> "17")
+const MASTER_RESIDENT_TOKENS = [];       // [{ tokenSet, tokens, normName, apt }]
+const KNOWN_FIXED_RESIDENTS = {
+  'tabajara tenorio dias': '94',
+  'tabajara tenorio': '94',
+  'tabajara': '94',
+  'paulino britto': '87',
+  'paulino s l bitto neto': '87',
+  'paulino s l bitto': '87',
+  'kristjan rappu': '82',
+  'kristjan': '82',
+  'thamara batista': '14',
+  'bete': '51',
+  'lpg cultura': '34',
+  'quadro phigor': '168'
+};
+
+function formatAptNumber(apt) {
+  if (!apt || apt === '–' || apt === 'Não Informado') return 'Não Informado';
+  const numOnly = String(apt).replace(/^(?:apto|apt|ap|apartamento|unidade|bloco|apot)[\s\-–.:#]*/i, '').trim();
+  return numOnly ? `apto ${numOnly}` : apt;
+}
+
+// Constrói índice global com 100% das transações de todas as fontes
+function buildMasterResidentAptIndex(allSourceRowsList) {
+  if (!Array.isArray(allSourceRowsList)) return;
+  allSourceRowsList.forEach(rows => {
+    if (!Array.isArray(rows)) return;
+    rows.forEach(r => {
+      if (r.length < 15) return;
+      const userRaw = r[19] || '';
+      const nsuRaw = r[14] || '';
+      const { name, apt } = extractDirectUserAndApt(userRaw, nsuRaw);
+      if (name && apt && name.length > 2 && name !== 'Não Identificado' && name.toLowerCase() !== 'unknown') {
+        const norm = cleanStrResident(name).toLowerCase().replace(/\s+/g, ' ').trim();
+        if (!MASTER_RESIDENT_APT_MAP[norm]) {
+          MASTER_RESIDENT_APT_MAP[norm] = apt;
+          const tokens = tokenizeResident(norm);
+          if (tokens.length > 0) {
+            MASTER_RESIDENT_TOKENS.push({
+              tokenSet: new Set(tokens),
+              tokens,
+              normName: norm,
+              apt
+            });
+          }
+        }
+      }
+    });
+  });
+  console.log(`Índice mestre de moradores You Go construído: ${Object.keys(MASTER_RESIDENT_APT_MAP).length} moradores indexados.`);
+}
+
+// Extrai nome limpo do morador e apartamento com resolução global inteligente
+function extractResidentAndApt(userRaw, nsuRaw, condoKey) {
+  let user = (userRaw || '').trim();
+  let nsu = (nsuRaw || '').trim();
+  if (!user && !nsu) {
+    return { name: 'Não Identificado', apt: 'Não Informado' };
+  }
+
+  // 1. Extração direta da linha atual
+  const direct = extractDirectUserAndApt(user, nsu);
+  if (direct.apt) {
+    return {
+      name: direct.name,
+      apt: formatAptNumber(direct.apt)
+    };
+  }
+
+  const morador = direct.name;
+  if (!morador || morador === 'Não Identificado' || morador.toLowerCase() === 'unknown' || morador.toLowerCase() === 'morador') {
+    return { name: morador || 'Não Identificado', apt: 'Não Informado' };
+  }
+
+  const norm = cleanStrResident(morador).toLowerCase().replace(/\s+/g, ' ').trim();
+
+  // 2. Consulta tabela fixa de apelidos/casos especiais
+  if (KNOWN_FIXED_RESIDENTS[norm]) {
+    return { name: morador, apt: formatAptNumber(KNOWN_FIXED_RESIDENTS[norm]) };
+  }
+
+  // 3. Match exato no índice histórico
+  if (MASTER_RESIDENT_APT_MAP[norm]) {
+    return { name: morador, apt: formatAptNumber(MASTER_RESIDENT_APT_MAP[norm]) };
+  }
+
+  // 4. Match parcial / subset de tokens (ex: "Aline Amaral" subset de "Aline Amaral Ferreira apto 114")
+  const uTokens = tokenizeResident(norm);
+  if (uTokens.length > 0) {
+    let bestApt = null;
+    let bestOverlap = 0;
+
+    for (const item of MASTER_RESIDENT_TOKENS) {
+      // É subset completo? (ex: "Michel Braga" contido em "michel sanches braga")
+      const isSubset = uTokens.every(t => item.tokenSet.has(t));
+      if (isSubset) {
+        return { name: morador, apt: formatAptNumber(item.apt) };
+      }
+
+      // Maior sobreposição de tokens (mínimo 2)
+      let overlap = 0;
+      for (const t of uTokens) {
+        if (item.tokenSet.has(t)) overlap++;
+      }
+      if (overlap >= 2 && overlap > bestOverlap) {
+        bestOverlap = overlap;
+        bestApt = item.apt;
+      }
+    }
+
+    if (bestApt) {
+      return { name: morador, apt: formatAptNumber(bestApt) };
+    }
+  }
+
+  return {
+    name: morador || 'Não Identificado',
+    apt: 'Não Informado'
+  };
+}
+
+// Detecta tipo de máquina (Lavadora / Secadora)
+function detectMachineType(row) {
+  const matr = (row[21] || '').trim();
+  if (MATRICULAS_YOU_GO[matr]) {
+    return {
+      type: MATRICULAS_YOU_GO[matr].maquina,
+      torre: MATRICULAS_YOU_GO[matr].torre,
+      isWash: MATRICULAS_YOU_GO[matr].maquina === 'Lavadora'
+    };
+  }
+
+  const prod = (row[5] || '').toUpperCase();
+  if (prod.includes('LAV')) return { type: 'Lavadora', torre: '', isWash: true };
+  if (prod.includes('SEC')) return { type: 'Secadora', torre: '', isWash: false };
+
+  const mola = (row[6] || '').trim().toUpperCase();
+  const molaCode = mola.split(' ')[0].trim();
+  if (MOLA_TIPO_MAP[molaCode] === 'wash') return { type: 'Lavadora', torre: '', isWash: true };
+  if (MOLA_TIPO_MAP[molaCode] === 'dry') return { type: 'Secadora', torre: '', isWash: false };
+  if (mola.includes('LAVA')) return { type: 'Lavadora', torre: '', isWash: true };
+  if (mola.includes('SECA')) return { type: 'Secadora', torre: '', isWash: false };
+
+  return { type: 'Lavadora', torre: '', isWash: true }; // Padrão seguro
+}
+
+function parseNumber(val) {
+  if (!val) return 0;
+  if (typeof val === 'number') return val;
+  const clean = String(val).replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
+  const n = parseFloat(clean);
+  return isNaN(n) ? 0 : n;
+}
+
+function parseDateBR(dateStr, timeStr) {
+  if (!dateStr) return null;
+  const parts = dateStr.split('/');
+  if (parts.length !== 3) return null;
+  const d = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10) - 1;
+  const y = parseInt(parts[2], 10);
+
+  let hh = 0, mm = 0, ss = 0;
+  if (timeStr) {
+    const tparts = timeStr.split(':');
+    if (tparts.length >= 2) {
+      hh = parseInt(tparts[0], 10) || 0;
+      mm = parseInt(tparts[1], 10) || 0;
+      ss = parseInt(tparts[2], 10) || 0;
+    }
+  }
+  return new Date(y, m, d, hh, mm, ss);
+}
+
+async function loadDataSources() {
+  rawTransactions = [];
+
+  // O PUQ Perdizes é atualizado pelo robô apenas via VendTEF
+  await tryLoad('LAVAI_VENDTEF_DATA', 'vendtef_local.js');
+  if (!window.LAVAI_VENDTEF_DATA) {
+    throw new Error('vendtef_local.js não encontrado. Coloque este arquivo na mesma pasta dos dados do robô.');
+  }
+  const vendtefRows = parseCSV(window.LAVAI_VENDTEF_DATA);
+
+  // Índice de moradores/apartamentos a partir do próprio VendTEF
+  buildMasterResidentAptIndex([vendtefRows]);
+  processSourceRows(vendtefRows, 'VendTEF');
+
+  // Cruzamento com a planilha de operações NR (Análise Fábio NR)
+  conciliarNR();
+
+  rawTransactions.sort((a, b) => b.timestamp - a.timestamp);
+  console.log(`Carregadas ${rawTransactions.length} transações do PUQ Perdizes (VendTEF).`);
+}
+
+// ══════════════════════════════════════════════════════
+// PLANILHA NR (Análise Fábio NR) — [data, hora, L/S, valor, usuário]
+// Fonte: portal ERP Vending. Para atualizar, substitua esta lista.
+// ══════════════════════════════════════════════════════
+const NR_PLANILHA = [["02/01/2026","13:42:17","L",7.0,"Richard"],["02/01/2026","22:11:47","L",7.0,"Fernando"],["02/01/2026","22:59:45","L",7.0,"Fernando"],["02/01/2026","23:36:30","L",7.0,"Duda"],["02/01/2026","22:58:05","S",6.99,"Fernando"],["02/01/2026","23:58:51","S",7.0,"Fernando"],["03/01/2026","00:14:18","L",7.0,"Duda"],["03/01/2026","00:53:21","S",6.99,"Duda"],["04/01/2026","00:22:55","L",7.0,"Fernando"],["04/01/2026","01:21:45","L",6.99,"Fernando"],["04/01/2026","11:46:31","L",7.0,"Breno Rossi"],["04/01/2026","22:02:17","L",7.0,"Fernando"],["04/01/2026","23:56:08","L",6.99,"Fernando"],["04/01/2026","01:22:20","S",7.0,"Fernando"],["04/01/2026","02:35:18","S",6.99,"Fernando"],["04/01/2026","12:42:58","S",6.99,"Breno Rossi"],["04/01/2026","23:56:43","S",7.0,"Fernando"],["05/01/2026","15:48:33","L",7.0,"Richard"],["05/01/2026","16:37:20","L",7.0,"Beatriz"],["05/01/2026","19:32:18","L",7.0,"Mariana Stella Lima"],["05/01/2026","17:04:55","S",7.0,"Richard"],["05/01/2026","18:24:15","S",7.0,"Beatriz"],["05/01/2026","20:59:56","S",6.99,"Mariana Stella Lima"],["06/01/2026","10:53:07","L",7.0,"Mariana Stella Lima"],["06/01/2026","22:10:26","L",6.99,"Fernando"],["06/01/2026","02:41:48","S",7.0,"Fernando"],["06/01/2026","20:41:50","S",7.0,"Fernando"],["06/01/2026","22:11:10","S",7.0,"Fernando"],["07/01/2026","12:13:02","L",7.0,"Duda"],["07/01/2026","21:10:01","L",7.0,"Mariana Stella Lima"],["07/01/2026","13:15:21","S",6.99,"Duda"],["07/01/2026","21:40:58","S",6.99,"Mariana Stella Lima"],["09/01/2026","10:53:08","L",7.0,"Mariana Stella Lima"],["09/01/2026","13:44:05","L",7.0,"Richard"],["09/01/2026","11:33:40","S",6.99,"Mariana Stella Lima"],["09/01/2026","14:19:32","S",6.99,"Richard"],["10/01/2026","09:44:04","L",7.0,"Fabio Malara"],["10/01/2026","10:53:48","S",6.99,"Fabio Malara"],["10/01/2026","18:11:31","S",7.0,"Fernando"],["10/01/2026","21:39:48","S",6.99,"Fernando"],["12/01/2026","10:57:48","L",7.0,"Mariana Stella Lima"],["12/01/2026","11:35:26","S",6.99,"Mariana Stella Lima"],["15/01/2026","11:09:06","L",7.0,"Mariana Stella Lima"],["15/01/2026","12:35:48","L",7.0,"Mariana Stella Lima"],["15/01/2026","21:37:33","L",7.0,"Mariana Stella Lima"],["15/01/2026","11:44:09","S",6.99,"Mariana Stella Lima"],["15/01/2026","13:15:59","S",6.99,"Mariana Stella Lima"],["15/01/2026","22:44:42","S",6.99,"Mariana Stella Lima"],["16/01/2026","18:23:20","L",7.0,"Breno Rossi"],["16/01/2026","19:04:23","S",6.99,"Breno Rossi"],["17/01/2026","10:50:11","L",7.0,"Fabio Malara"],["17/01/2026","11:24:25","L",6.99,"Fabio Malara"],["17/01/2026","11:25:11","S",7.0,"Fabio Malara"],["17/01/2026","12:47:39","S",6.99,"Fabio Malara"],["18/01/2026","12:19:41","L",7.0,"Fausto"],["19/01/2026","20:23:56","L",7.0,"Nair"],["19/01/2026","21:17:17","L",7.0,"Nair"],["19/01/2026","22:07:10","L",6.99,"Nair"],["19/01/2026","21:15:46","S",6.99,"Nair"],["19/01/2026","22:07:57","S",7.0,"Nair"],["19/01/2026","23:08:11","S",6.99,"Nair"],["22/01/2026","08:27:27","L",7.0,"Mariana Stella Lima"],["22/01/2026","09:59:06","L",7.0,"Mariana Stella Lima"],["22/01/2026","09:03:04","S",6.99,"Mariana Stella Lima"],["22/01/2026","10:43:54","S",6.99,"Mariana Stella Lima"],["24/01/2026","07:31:13","L",7.0,"Heloisa"],["24/01/2026","08:28:54","L",7.0,"Maria"],["24/01/2026","11:20:04","L",7.0,"Fabio Malara"],["24/01/2026","12:36:53","L",6.99,"Fabio Malara"],["24/01/2026","09:16:19","S",7.0,"Taled"],["24/01/2026","08:09:37","S",6.99,"Heloisa"],["24/01/2026","12:37:29","S",7.0,"Fabio Malara"],["24/01/2026","13:57:37","S",6.99,"Fabio Malara"],["25/01/2026","21:44:42","L",7.0,"Ana Carolina"],["25/01/2026","22:24:27","S",6.99,"Ana Carolina"],["27/01/2026","13:36:38","L",7.0,"Christovam Neto"],["27/01/2026","18:28:04","L",7.0,"Breno Rossi"],["27/01/2026","14:19:59","S",6.99,"Christovam Neto"],["27/01/2026","19:06:23","S",6.99,"Breno Rossi"],["29/01/2026","08:55:02","L",7.0,"Mariana Stella Lima"],["29/01/2026","10:19:00","L",7.0,"Mariana Stella Lima"],["29/01/2026","20:00:35","L",7.0,"Ana Carolina"],["29/01/2026","09:29:34","S",6.99,"Mariana Stella Lima"],["29/01/2026","10:54:59","S",6.99,"Mariana Stella Lima"],["29/01/2026","20:35:24","S",6.99,"Ana Carolina"],["30/01/2026","10:01:37","L",7.0,"Mariana Stella Lima"],["30/01/2026","11:27:57","L",7.0,"Mariana Stella Lima"],["30/01/2026","15:47:22","L",7.0,"Ana Carolina"],["30/01/2026","10:39:03","S",6.99,"Mariana Stella Lima"],["30/01/2026","12:04:19","S",6.99,"Mariana Stella Lima"],["30/01/2026","16:25:29","S",6.99,"Ana Carolina"],["02/02/2026","18:39:33","L",7.0,"Maria Laura"],["02/02/2026","11:26:55","L",7.0,"Juliana"],["02/02/2026","19:15:23","S",6.99,"Maria Laura"],["02/02/2026","12:02:38","S",6.99,"Juliana"],["04/02/2026","12:16:48","L",7.0,"Christovam Neto"],["04/02/2026","13:13:56","L",7.0,"Christovam Neto"],["04/02/2026","18:02:39","L",7.0,"Fernando"],["04/02/2026","18:47:45","L",6.99,"Fernando"],["04/02/2026","13:13:04","S",6.99,"Christovam Neto"],["04/02/2026","14:20:23","S",6.99,"Christovam Neto"],["04/02/2026","18:48:23","S",7.0,"Fernando"],["05/02/2026","10:15:23","L",6.99,"Mariana Stella Lima"],["05/02/2026","11:43:11","L",7.0,"Mariana Stella Lima"],["05/02/2026","13:09:48","L",7.0,"Mariana Stella Lima"],["05/02/2026","15:34:30","L",7.0,"Mariana Stella Lima"],["05/02/2026","19:36:51","L",7.0,"Duda"],["05/02/2026","20:30:39","L",6.99,"Duda"],["05/02/2026","21:22:08","L",6.99,"Duda"],["05/02/2026","22:31:10","L",6.99,"Duda"],["05/02/2026","10:14:09","S",7.0,"Mariana Stella Lima"],["05/02/2026","12:19:20","S",6.99,"Mariana Stella Lima"],["05/02/2026","13:11:54","S",6.99,"Mariana Stella Lima"],["05/02/2026","15:35:50","S",6.99,"Mariana Stella Lima"],["05/02/2026","20:31:19","S",7.0,"Duda"],["05/02/2026","21:22:45","S",7.0,"Duda"],["05/02/2026","23:15:31","S",7.0,"Duda"],["06/02/2026","18:57:24","L",7.0,"Maria Laura"],["06/02/2026","10:42:33","L",7.0,"Thalia"],["06/02/2026","11:39:29","L",7.0,"Juliana"],["06/02/2026","19:32:28","S",6.99,"Maria Laura"],["06/02/2026","12:12:14","S",6.99,"Juliana"],["07/02/2026","10:36:26","L",7.0,"Fabio Malara"],["07/02/2026","11:11:12","L",6.99,"Fabio Malara"],["07/02/2026","14:35:46","L",7.0,"Fernando"],["07/02/2026","16:28:55","L",7.0,"Fernando"],["07/02/2026","11:11:44","S",7.0,"Fabio Malara"],["07/02/2026","11:59:38","S",6.99,"Fabio Malara"],["07/02/2026","15:30:55","S",6.99,"Fernando"],["07/02/2026","18:04:24","S",6.99,"Fernando"],["08/02/2026","14:13:48","L",7.0,"Elaine"],["08/02/2026","20:19:57","L",7.0,"Breno Rossi"],["08/02/2026","21:01:33","S",6.99,"Breno Rossi"],["09/02/2026","00:03:41","L",7.0,"Ana Carolina"],["09/02/2026","00:59:50","L",6.99,"Ana Carolina"],["09/02/2026","01:44:23","S",7.0,"Ana Carolina"],["10/02/2026","15:17:16","L",7.0,"Juliana"],["10/02/2026","15:50:02","S",6.99,"Juliana"],["11/02/2026","13:26:30","L",7.0,"Fernando"],["11/02/2026","14:34:43","L",7.0,"Christovam Neto"],["11/02/2026","15:20:24","L",7.0,"Christovam Neto"],["11/02/2026","20:46:56","L",7.0,"Fernando"],["11/02/2026","14:22:46","S",6.99,"Fernando"],["11/02/2026","15:19:46","S",6.99,"Christovam Neto"],["11/02/2026","16:08:08","S",6.99,"Christovam Neto"],["11/02/2026","21:59:35","S",6.99,"Fernando"],["12/02/2026","10:02:05","L",7.0,"Maria Laura"],["12/02/2026","19:28:00","L",7.0,"Maria Laura"],["12/02/2026","09:02:43","L",7.0,"Mariana Stella Lima"],["12/02/2026","10:34:09","L",7.0,"Mariana Stella Lima"],["12/02/2026","14:03:38","L",7.0,"Duda"],["12/02/2026","23:41:31","L",7.0,"Alexander"],["12/02/2026","10:35:21","S",7.0,"Maria Laura"],["12/02/2026","20:08:21","S",6.99,"Maria Laura"],["12/02/2026","09:39:21","S",6.99,"Mariana Stella Lima"],["12/02/2026","11:22:09","S",7.0,"Mariana Stella Lima"],["12/02/2026","15:13:09","S",6.99,"Duda"],["13/02/2026","20:11:03","L",7.0,"Vinicius Conopinski"],["13/02/2026","20:43:58","L",6.99,"Vinicius Conopinski"],["13/02/2026","20:45:00","S",7.0,"Vinicius Conopinski"],["13/02/2026","21:40:23","S",6.99,"Vinicius Conopinski"],["13/02/2026","00:14:46","S",6.99,"Alexander"],["14/02/2026","09:19:18","L",7.0,"Jose"],["14/02/2026","12:28:26","L",7.0,"Jose"],["14/02/2026","09:53:33","S",6.99,"Jose"],["14/02/2026","12:59:31","S",6.99,"Jose"],["15/02/2026","18:26:07","L",7.0,"Fernando"],["15/02/2026","19:17:30","L",6.99,"Fernando"],["15/02/2026","21:10:57","L",6.99,"Fernando"],["15/02/2026","19:18:09","S",7.0,"Fernando"],["15/02/2026","21:11:44","S",7.0,"Fernando"],["16/02/2026","14:20:27","L",7.0,"Lisis"],["16/02/2026","15:08:15","L",6.99,"Lisis"],["16/02/2026","12:53:46","L",7.0,"Maria Heloisa Soares"],["16/02/2026","17:58:40","L",7.0,"Ana Carolina"],["16/02/2026","19:03:07","L",6.99,"Ana Carolina"],["16/02/2026","16:15:40","S",7.0,"Lisis"],["16/02/2026","13:52:27","S",6.99,"Maria Heloisa Soares"],["16/02/2026","19:35:37","S",7.0,"Ana Carolina"],["17/02/2026","12:57:58","L",7.0,"Heloisa"],["17/02/2026","16:46:11","L",7.0,"Alexander"],["17/02/2026","13:33:18","S",6.99,"Heloisa"],["17/02/2026","17:19:49","S",6.99,"Alexander"],["18/02/2026","07:05:49","L",7.0,"Fabio Malara"],["18/02/2026","10:34:27","L",7.0,"Jose"],["18/02/2026","13:42:54","L",7.0,"Duda"],["18/02/2026","07:39:15","S",6.99,"Fabio Malara"],["18/02/2026","11:07:34","S",7.0,"Pedro Miguel"],["18/02/2026","14:58:40","S",6.99,"Duda"],["19/02/2026","08:00:45","L",7.0,"Jose"],["19/02/2026","09:44:02","L",7.0,"Fernanda De Oliveira"],["19/02/2026","17:01:25","L",7.0,"Breno Rossi"],["19/02/2026","20:57:54","L",7.0,"Mariana Stella Lima"],["19/02/2026","08:35:04","S",6.99,"Jose"],["19/02/2026","10:16:18","S",6.99,"Fernanda De Oliveira"],["19/02/2026","17:32:53","S",6.99,"Breno Rossi"],["19/02/2026","21:36:06","S",6.99,"Mariana Stella Lima"],["19/02/2026","23:38:17","S",7.0,"Luccs"],["20/02/2026","17:47:52","L",7.0,"Maria Laura"],["20/02/2026","13:49:33","L",7.0,"Mariana Stella Lima"],["20/02/2026","21:19:27","L",7.0,"Alexander"],["20/02/2026","21:53:22","L",7.0,"Alexander"],["20/02/2026","22:42:20","L",7.0,"Alexander"],["20/02/2026","18:22:24","S",6.99,"Maria Laura"],["20/02/2026","13:50:49","S",6.99,"Mariana Stella Lima"],["20/02/2026","21:52:48","S",6.99,"Alexander"],["20/02/2026","22:41:48","S",6.99,"Alexander"],["21/02/2026","09:53:09","L",7.0,"Fabio Malara"],["21/02/2026","16:19:20","L",7.0,"Felipe"],["21/02/2026","11:23:19","S",6.99,"Fabio Malara"],["21/02/2026","17:35:03","S",6.99,"Felipe"],["22/02/2026","15:25:36","L",7.0,"Vinicius"],["22/02/2026","18:31:25","L",7.0,"Ana Carolina"],["22/02/2026","19:08:17","L",7.0,"Beatriz"],["22/02/2026","20:18:19","L",7.0,"Ana Carolina"],["22/02/2026","22:09:18","L",7.0,"Ana Clara"],["22/02/2026","16:03:52","S",6.99,"Vinicius"],["22/02/2026","19:14:57","S",7.0,"Ana Carolina"],["22/02/2026","20:13:08","S",7.0,"Beatriz"],["22/02/2026","21:14:35","S",6.99,"Ana Carolina"],["22/02/2026","22:38:59","S",6.99,"Ana Clara"],["23/02/2026","16:24:57","L",7.0,"Maria Laura"],["23/02/2026","08:45:07","L",7.0,"Juliana"],["23/02/2026","13:28:37","L",7.0,"Fernanda De Oliveira"],["23/02/2026","19:20:07","L",7.0,"Alexander"],["23/02/2026","19:53:25","L",7.0,"Alexander"],["23/02/2026","17:00:38","S",6.99,"Maria Laura"],["23/02/2026","18:12:29","S",7.0,"Maria Laura"],["23/02/2026","09:20:50","S",6.99,"Juliana"],["23/02/2026","14:05:39","S",6.99,"Fernanda De Oliveira"],["23/02/2026","19:52:44","S",6.99,"Alexander"],["23/02/2026","20:40:52","S",6.99,"Alexander"],["25/02/2026","09:56:10","L",7.0,"Fernando"],["25/02/2026","11:36:41","L",6.99,"Fernando"],["25/02/2026","22:58:14","L",7.0,"Fernando"],["25/02/2026","23:32:53","L",7.0,"Fernando"],["25/02/2026","11:38:10","S",7.0,"Fernando"],["25/02/2026","12:53:37","S",6.99,"Fernando"],["25/02/2026","23:29:00","S",6.99,"Fernando"],["26/02/2026","15:37:53","L",6.99,"Fernando"],["26/02/2026","18:06:47","L",7.0,"Maria Laura"],["26/02/2026","19:03:28","L",7.0,"Maria Laura"],["26/02/2026","17:24:54","L",7.0,"Felipe"],["26/02/2026","21:08:14","L",7.0,"Mariana Stella Lima"],["26/02/2026","22:38:19","L",7.0,"Mariana Stella Lima"],["26/02/2026","15:39:17","S",7.0,"Fernando"],["26/02/2026","17:01:39","S",6.99,"Fernando"],["26/02/2026","19:17:23","S",6.99,"Maria Laura"],["26/02/2026","20:07:28","S",7.0,"Maria Laura"],["26/02/2026","18:27:24","S",7.0,"Felipe"],["26/02/2026","21:09:57","S",6.99,"Mariana Stella Lima"],["26/02/2026","22:40:37","S",6.99,"Mariana Stella Lima"],["27/02/2026","11:51:23","L",7.0,"Christovam Neto"],["27/02/2026","12:52:38","L",7.0,"Christovam Neto"],["27/02/2026","14:09:19","L",7.0,"Juliana"],["27/02/2026","17:00:43","L",7.0,"Alexander"],["27/02/2026","17:35:43","L",6.99,"Alexander"],["27/02/2026","18:52:27","L",7.0,"Fernando"],["27/02/2026","21:53:36","L",7.0,"Breno Rossi"],["27/02/2026","12:49:42","S",6.99,"Christovam Neto"],["27/02/2026","13:36:51","S",6.99,"Christovam Neto"],["27/02/2026","14:41:38","S",6.99,"Juliana"],["27/02/2026","17:36:14","S",7.0,"Alexander"],["27/02/2026","18:25:26","S",6.99,"Alexander"],["27/02/2026","20:55:37","S",6.99,"Fernando"],["28/02/2026","08:31:08","L",7.0,"Duda"],["28/02/2026","09:29:39","L",6.99,"Duda"],["28/02/2026","10:42:54","L",6.99,"Duda"],["28/02/2026","12:38:52","L",7.0,"Fabio Malara"],["28/02/2026","07:50:20","S",6.99,"Breno Rossi"],["28/02/2026","09:30:22","S",7.0,"Duda"],["28/02/2026","10:43:29","S",7.0,"Duda"],["28/02/2026","11:29:16","S",6.99,"Duda"],["28/02/2026","13:31:26","S",6.99,"Fabio Malara"],["01/03/2026","18:55:53","L",7.0,"Mariana Stella Lima"],["01/03/2026","20:08:20","L",7.0,"Ana Carolina"],["01/03/2026","18:57:08","S",6.99,"Mariana Stella Lima"],["01/03/2026","20:51:08","S",6.99,"Ana Carolina"],["02/03/2026","21:24:35","L",7.0,"Maria Laura"],["02/03/2026","12:48:48","L",7.0,"Heloisa"],["02/03/2026","13:34:01","L",7.0,"Juliana"],["02/03/2026","22:02:36","S",6.99,"Maria Laura"],["02/03/2026","13:25:11","S",6.99,"Heloisa"],["02/03/2026","14:17:05","S",6.99,"Juliana"],["03/03/2026","17:09:23","L",7.0,"Heitor Silveira"],["03/03/2026","18:47:46","L",7.0,"Vinicius Conopinski"],["03/03/2026","19:27:12","L",6.99,"Vinicius Conopinski"],["03/03/2026","13:06:28","L",7.0,"Mariana Stella Lima"],["03/03/2026","16:30:30","L",7.0,"Ana Clara"],["03/03/2026","18:09:48","S",6.99,"Heitor Silveira"],["03/03/2026","19:28:09","S",7.0,"Vinicius Conopinski"],["03/03/2026","20:16:17","S",6.99,"Vinicius Conopinski"],["03/03/2026","13:08:21","S",6.99,"Mariana Stella Lima"],["03/03/2026","17:03:58","S",6.99,"Ana Clara"],["04/03/2026","11:31:28","L",7.0,"Alexander"],["04/03/2026","12:07:55","L",7.0,"Christovam Neto"],["04/03/2026","13:15:52","L",6.99,"Christovam Neto"],["04/03/2026","14:03:20","L",6.99,"Christovam Neto"],["04/03/2026","12:08:58","S",6.99,"Christovam Neto"],["04/03/2026","13:13:18","S",7.0,"Christovam Neto"],["04/03/2026","14:02:09","S",7.0,"Christovam Neto"],["04/03/2026","14:54:06","S",7.0,"Christovam Neto"],["06/03/2026","14:45:29","L",7.0,"Mariana Stella Lima"],["06/03/2026","16:41:29","L",7.0,"Mariana Stella Lima"],["06/03/2026","18:19:55","L",7.0,"Mariana Stella Lima"],["06/03/2026","20:08:01","L",7.0,"Mariana Stella Lima"],["06/03/2026","14:46:49","S",6.99,"Mariana Stella Lima"],["06/03/2026","16:43:19","S",6.99,"Mariana Stella Lima"],["06/03/2026","18:21:53","S",6.99,"Mariana Stella Lima"],["06/03/2026","20:09:29","S",6.99,"Mariana Stella Lima"],["07/03/2026","08:49:31","L",7.0,"Fabio Malara"],["07/03/2026","09:43:27","L",7.0,"Fabio Malara"],["07/03/2026","16:59:12","L",7.0,"Breno Rossi"],["07/03/2026","09:42:48","S",6.99,"Fabio Malara"],["07/03/2026","10:49:39","S",6.99,"Fabio Malara"],["07/03/2026","17:32:38","S",6.99,"Breno Rossi"],["08/03/2026","19:56:14","L",7.0,"Maria Laura"],["08/03/2026","11:40:07","L",7.0,"Fernando"],["08/03/2026","13:02:56","L",6.99,"Fernando"],["08/03/2026","14:27:35","L",7.0,"Fernando"],["08/03/2026","15:53:27","L",6.99,"Fernando"],["08/03/2026","20:39:31","L",7.0,"Vinicius"],["08/03/2026","20:33:02","S",6.99,"Maria Laura"],["08/03/2026","13:03:42","S",7.0,"Fernando"],["08/03/2026","14:09:41","S",6.99,"Fernando"],["08/03/2026","15:54:19","S",7.0,"Fernando"],["08/03/2026","21:37:52","S",6.99,"Vinicius"],["13/03/2026","21:49:45","L",7.0,"Alexander"],["13/03/2026","22:40:12","L",7.0,"Alexander"],["13/03/2026","12:05:36","L",7.0,"Ana Carolina"],["13/03/2026","12:48:25","L",6.99,"Ana Carolina"],["13/03/2026","13:27:25","L",7.0,"Ana Carolina"],["13/03/2026","14:41:50","L",7.0,"Beatriz"],["13/03/2026","20:23:34","L",7.0,"Alexander"],["13/03/2026","21:00:57","L",7.0,"Alexander"],["13/03/2026","22:34:44","S",6.99,"Alexander"],["13/03/2026","14:05:42","S",6.99,"Ana Carolina"],["13/03/2026","16:19:16","S",6.99,"Beatriz"],["13/03/2026","20:58:54","S",6.99,"Alexander"],["13/03/2026","21:46:34","S",6.99,"Alexander"],["14/03/2026","12:37:36","L",7.0,"Heloisa"],["14/03/2026","13:39:59","L",7.0,"Maria Heloisa Soares"],["14/03/2026","15:02:16","L",7.0,"Fabio Malara"],["14/03/2026","15:35:39","L",6.99,"Fabio Malara"],["14/03/2026","13:18:38","S",6.99,"Heloisa"],["14/03/2026","14:22:25","S",6.99,"Maria Heloisa Soares"],["14/03/2026","15:36:29","S",7.0,"Fabio Malara"],["14/03/2026","16:34:45","S",6.99,"Fabio Malara"],["15/03/2026","16:28:36","L",7.0,"Maria Laura"],["15/03/2026","12:19:10","L",7.0,"Fernando"],["15/03/2026","18:11:29","L",7.0,"Mariana Stella Lima"],["15/03/2026","19:57:16","L",7.0,"Mariana Stella Lima"],["15/03/2026","22:19:25","L",7.0,"Mariana Stella Lima"],["15/03/2026","17:02:24","S",6.99,"Maria Laura"],["15/03/2026","12:49:23","S",6.99,"Fernando"],["15/03/2026","18:14:31","S",6.99,"Mariana Stella Lima"],["15/03/2026","19:59:07","S",6.99,"Mariana Stella Lima"],["15/03/2026","22:21:27","S",6.99,"Mariana Stella Lima"],["16/03/2026","13:16:53","L",7.0,"Heitor Silveira"],["16/03/2026","16:10:38","L",7.0,"Fernanda De Oliveira"],["16/03/2026","19:06:28","L",7.0,"Maria Laura"],["16/03/2026","06:35:42","L",7.0,"Breno Rossi"],["16/03/2026","10:42:57","L",7.0,"Juliana"],["16/03/2026","13:57:13","L",7.0,"Germana"],["16/03/2026","13:51:19","S",6.99,"Heitor Silveira"],["16/03/2026","16:44:08","S",6.99,"Fernanda De Oliveira"],["16/03/2026","19:48:53","S",6.99,"Maria Laura"],["16/03/2026","20:41:01","S",7.0,"Maria Laura"],["16/03/2026","21:32:26","S",6.99,"Maria Laura"],["16/03/2026","22:22:34","S",7.0,"Maria Laura"],["16/03/2026","07:14:55","S",6.99,"Breno Rossi"],["16/03/2026","11:20:59","S",6.99,"Juliana"],["16/03/2026","14:41:26","S",6.99,"Germana"],["17/03/2026","14:37:19","L",7.0,"Vinicius Conopinski"],["17/03/2026","15:20:54","L",7.0,"Vinicius Conopinski"],["17/03/2026","17:16:16","L",7.0,"Vinicius Conopinski"],["17/03/2026","12:52:45","L",7.0,"Christovam Neto"],["17/03/2026","13:33:14","L",7.0,"Christovam Neto"],["17/03/2026","16:29:46","L",7.0,"Christovam Neto"],["17/03/2026","15:12:01","S",6.99,"Vinicius Conopinski"],["17/03/2026","16:18:30","S",6.99,"Vinicius Conopinski"],["17/03/2026","17:55:48","S",6.99,"Vinicius Conopinski"],["17/03/2026","18:43:48","S",7.0,"Vinicius Conopinski"],["17/03/2026","13:31:46","S",6.99,"Christovam Neto"],["17/03/2026","14:18:44","S",6.99,"Christovam Neto"],["17/03/2026","17:06:00","S",6.99,"Christovam Neto"],["19/03/2026","14:01:20","L",7.0,"Germana"],["19/03/2026","19:17:35","L",7.0,"Alexander"],["19/03/2026","20:24:34","L",7.0,"Alexander"],["19/03/2026","22:49:11","L",7.0,"Mariana Stella Lima"],["19/03/2026","14:01:20","L",7.0,"Germana"],["19/03/2026","19:17:35","L",7.0,"Alexander"],["19/03/2026","20:24:34","L",7.0,"Alexander"],["19/03/2026","22:49:11","L",7.0,"Mariana Stella Lima"],["19/03/2026","14:37:23","S",6.99,"Germana"],["19/03/2026","19:53:24","S",6.99,"Alexander"],["19/03/2026","21:33:51","S",6.99,"Alexander"],["19/03/2026","22:50:53","S",6.99,"Mariana Stella Lima"],["19/03/2026","21:33:51","S",6.99,"Alexander"],["19/03/2026","14:37:23","S",6.99,"Germana"],["19/03/2026","19:53:24","S",6.99,"Alexander"],["19/03/2026","22:50:53","S",6.99,"Mariana Stella Lima"],["20/03/2026","07:03:24","L",7.0,"Mariana Stella Lima"],["20/03/2026","07:04:15","S",6.99,"Mariana Stella Lima"],["21/03/2026","18:34:23","L",7.0,"Maria Laura"],["21/03/2026","19:22:20","L",7.0,"Maria Laura"],["21/03/2026","10:19:19","L",7.0,"Fabio Malara"],["21/03/2026","11:43:48","L",7.0,"Juliana"],["21/03/2026","19:17:00","S",6.99,"Maria Laura"],["21/03/2026","20:08:14","S",6.99,"Maria Laura"],["21/03/2026","11:23:16","S",6.99,"Fabio Malara"],["21/03/2026","12:19:03","S",6.99,"Juliana"],["22/03/2026","11:21:09","L",7.0,"Fernando"],["22/03/2026","14:26:33","L",7.0,"Vinicius"],["22/03/2026","17:56:02","L",7.0,"Mariana Stella Lima"],["22/03/2026","19:43:57","L",7.0,"Mariana Stella Lima"],["22/03/2026","21:37:06","L",7.0,"Ana Carolina"],["22/03/2026","22:14:43","L",6.99,"Ana Carolina"],["22/03/2026","23:32:22","L",7.0,"Beatriz"],["22/03/2026","11:54:14","S",6.99,"Fernando"],["22/03/2026","15:01:02","S",6.99,"Vinicius"],["22/03/2026","17:57:12","S",6.99,"Mariana Stella Lima"],["22/03/2026","19:46:02","S",6.99,"Mariana Stella Lima"],["22/03/2026","22:48:07","S",7.0,"Ana Carolina"],["23/03/2026","12:50:24","L",7.0,"Heloisa"],["23/03/2026","18:11:21","L",7.0,"Ana Clara"],["23/03/2026","00:08:05","S",6.99,"Beatriz"],["23/03/2026","13:30:22","S",6.99,"Heloisa"],["23/03/2026","18:45:33","S",6.99,"Ana Clara"],["24/03/2026","12:15:21","L",7.0,"Fernanda De Oliveira"],["24/03/2026","12:47:52","S",6.99,"Fernanda De Oliveira"],["25/03/2026","13:09:06","L",7.0,"Christovam Neto"],["25/03/2026","14:03:18","L",7.0,"Christovam Neto"],["25/03/2026","22:58:37","L",7.0,"Alexander"],["25/03/2026","14:02:25","S",6.99,"Christovam Neto"],["25/03/2026","14:48:27","S",6.99,"Christovam Neto"],["25/03/2026","23:29:14","S",6.99,"Alexander"],["26/03/2026","14:17:25","L",7.0,"Juliana"],["26/03/2026","20:08:46","L",7.0,"Mariana Stella Lima"],["26/03/2026","14:51:41","S",6.99,"Juliana"],["26/03/2026","20:10:27","S",6.99,"Mariana Stella Lima"],["27/03/2026","11:18:55","L",7.0,"Mariana Stella Lima"],["27/03/2026","14:32:19","L",7.0,"Julia"],["27/03/2026","15:10:26","L",7.0,"Alexander"],["27/03/2026","18:41:18","L",7.0,"Breno Rossi"],["27/03/2026","11:20:09","S",6.99,"Mariana Stella Lima"],["27/03/2026","15:06:45","S",6.99,"Julia"],["27/03/2026","15:59:31","S",6.99,"Alexander"],["27/03/2026","19:14:27","S",6.99,"Breno Rossi"],["28/03/2026","08:57:32","L",7.0,"Mariana Stella Lima"],["28/03/2026","09:37:39","L",7.0,"Fabio Malara"],["28/03/2026","10:28:03","L",7.0,"Fabio Malara"],["28/03/2026","12:23:09","L",7.0,"Duda"],["28/03/2026","13:07:24","L",7.0,"Germana"],["28/03/2026","13:41:19","L",7.0,"Duda"],["28/03/2026","14:21:11","L",7.0,"Duda"],["28/03/2026","15:05:52","L",6.99,"Duda"],["28/03/2026","08:59:53","S",6.99,"Mariana Stella Lima"],["28/03/2026","10:27:24","S",6.99,"Fabio Malara"],["28/03/2026","11:26:29","S",6.99,"Fabio Malara"],["28/03/2026","13:43:57","S",6.99,"Duda"],["28/03/2026","15:06:33","S",7.0,"Duda"],["28/03/2026","15:52:52","S",6.99,"Duda"],["29/03/2026","16:09:22","L",7.0,"Maria Laura"],["29/03/2026","18:49:47","L",7.0,"Beatriz"],["29/03/2026","22:38:07","L",7.0,"Maria Laura"],["29/03/2026","13:51:11","L",7.0,"Vinicius"],["29/03/2026","14:57:44","L",7.0,"Ana Carolina"],["29/03/2026","17:09:24","L",7.0,"Ana Clara"],["29/03/2026","18:05:44","L",7.0,"Isadora Costa"],["29/03/2026","16:44:46","S",6.99,"Maria Laura"],["29/03/2026","19:38:19","S",6.99,"Beatriz"],["29/03/2026","23:11:32","S",6.99,"Maria Laura"],["29/03/2026","14:25:50","S",6.99,"Vinicius"],["29/03/2026","15:41:00","S",6.99,"Ana Carolina"],["29/03/2026","17:47:21","S",6.99,"Ana Clara"],["29/03/2026","18:44:40","S",6.99,"Isadora Costa"],["30/03/2026","12:41:37","L",7.0,"Maria Laura"],["30/03/2026","15:34:05","L",7.0,"Heitor Silveira"],["30/03/2026","13:18:02","S",6.99,"Maria Laura"],["30/03/2026","16:06:55","S",6.99,"Heitor Silveira"],["31/03/2026","11:02:40","L",7.0,"Heloisa"],["31/03/2026","14:37:39","L",7.0,"Duda"],["31/03/2026","11:39:13","S",6.99,"Heloisa"],["01/04/2026","09:26:13","L",7.0,"Adriana"],["01/04/2026","10:01:18","L",7.0,"Adriana"],["01/04/2026","11:45:02","L",7.0,"Juliana"],["01/04/2026","12:31:31","L",7.0,"Fernanda De Oliveira"],["01/04/2026","13:08:04","L",7.0,"Fernanda De Oliveira"],["01/04/2026","14:02:43","L",6.99,"Sdriane"],["01/04/2026","09:57:03","S",6.99,"Adriana"],["01/04/2026","10:45:09","S",6.99,"Adriana"],["01/04/2026","12:18:58","S",6.99,"Juliana"],["01/04/2026","13:07:10","S",6.99,"Fernanda De Oliveira"],["01/04/2026","14:01:54","S",7.0,"Sdriane"],["01/04/2026","14:48:44","S",7.0,"Christovam Neto"],["02/04/2026","01:35:58","L",7.0,"Alexander"],["02/04/2026","09:47:07","L",7.0,"Mariana Stella Lima"],["02/04/2026","11:19:00","L",7.0,"Mariana Stella Lima"],["02/04/2026","15:14:53","L",7.0,"Alexander"],["02/04/2026","02:09:41","S",6.99,"Alexander"],["02/04/2026","09:49:00","S",6.99,"Mariana Stella Lima"],["02/04/2026","11:19:50","S",6.99,"Mariana Stella Lima"],["02/04/2026","15:48:18","S",6.99,"Alexander"],["03/04/2026","09:20:50","L",7.0,"Vinicius Conopinski"],["03/04/2026","09:20:50","L",7.0,"Vinicius Conopinski"],["03/04/2026","09:52:26","S",6.99,"Vinicius Conopinski"],["03/04/2026","09:52:26","S",6.99,"Vinicius Conopinski"],["04/04/2026","13:15:36","L",7.0,"Germana"],["04/04/2026","13:49:38","S",6.99,"Germana"],["05/04/2026","13:32:22","L",7.0,"Ana Carolina"],["05/04/2026","19:58:08","L",7.0,"Breno Rossi"],["05/04/2026","20:31:07","L",7.0,"Fabio Malara"],["05/04/2026","21:37:55","L",7.0,"Mariana Stella Lima"],["05/04/2026","14:06:49","S",6.99,"Ana Carolina"],["05/04/2026","20:28:38","S",6.99,"Breno Rossi"],["05/04/2026","21:43:31","S",7.0,"Fabio Malara"],["05/04/2026","22:34:19","S",7.0,"Mariana Stella Lima"],["06/04/2026","11:25:32","L",7.0,"Juliana"],["06/04/2026","19:37:01","L",7.0,"Vinicius"],["06/04/2026","12:00:14","S",6.99,"Juliana"],["06/04/2026","20:14:50","S",6.99,"Vinicius"],["07/04/2026","14:49:13","L",7.0,"Adriana"],["07/04/2026","15:28:43","L",7.0,"Adriana"],["07/04/2026","16:16:02","L",7.0,"Adriana"],["07/04/2026","17:04:19","L",7.0,"Adriana"],["07/04/2026","17:46:10","L",7.0,"Germana"],["07/04/2026","21:32:12","L",7.0,"Ana Clara"],["07/04/2026","15:27:45","S",6.99,"Adriana"],["07/04/2026","16:14:22","S",6.99,"Adriana"],["07/04/2026","17:02:53","S",6.99,"Adriana"],["07/04/2026","17:49:40","S",7.0,"Adriana"],["07/04/2026","18:36:35","S",7.0,"Germana"],["07/04/2026","22:09:50","S",6.99,"Ana Clara"],["08/04/2026","15:01:13","L",7.0,"Christovam Neto"],["08/04/2026","15:45:51","L",7.0,"Christovam Neto"],["08/04/2026","13:15:27","L",7.0,"Duda"],["08/04/2026","16:28:24","S",6.99,"Christovam Neto"],["08/04/2026","15:23:56","S",7.0,"Gerlany"],["09/04/2026","15:23:44","L",7.0,"Maria Laura"],["09/04/2026","16:52:43","L",7.0,"Fernando"],["09/04/2026","17:51:50","L",7.0,"Fernando"],["09/04/2026","09:16:31","L",7.0,"Heloisa"],["09/04/2026","16:11:53","L",7.0,"Gerlany"],["09/04/2026","20:14:21","L",7.0,"Mariana Stella Lima"],["09/04/2026","20:53:26","L",7.0,"Alexander"],["09/04/2026","15:59:13","S",6.99,"Maria Laura"],["09/04/2026","17:50:19","S",6.99,"Fernando"],["09/04/2026","09:55:40","S",6.99,"Heloisa"],["09/04/2026","20:15:10","S",6.99,"Mariana Stella Lima"],["09/04/2026","21:52:35","S",6.99,"Alexander"],["10/04/2026","12:52:12","L",7.0,"Maria Laura"],["10/04/2026","13:33:16","S",6.99,"Maria Laura"],["11/04/2026","10:31:33","L",7.0,"Fabio Malara"],["11/04/2026","11:19:15","L",7.0,"Fabio Malara"],["11/04/2026","11:18:35","S",6.99,"Fabio Malara"],["11/04/2026","12:16:31","S",6.99,"Fabio Malara"],["12/04/2026","09:12:11","L",7.0,"Beatriz"],["12/04/2026","13:32:50","L",7.0,"Ana Carolina"],["12/04/2026","19:22:00","L",7.0,"Mariana Stella Lima"],["12/04/2026","20:45:40","L",7.0,"Mariana Stella Lima"],["12/04/2026","09:51:54","S",6.99,"Beatriz"],["12/04/2026","14:07:15","S",6.99,"Ana Carolina"],["12/04/2026","19:23:10","S",6.99,"Mariana Stella Lima"],["12/04/2026","20:48:51","S",6.99,"Mariana Stella Lima"],["13/04/2026","13:34:22","L",7.0,"Fernando"],["13/04/2026","20:49:30","L",7.0,"Heitor Silveira"],["13/04/2026","14:55:51","L",7.0,"Julia"],["13/04/2026","15:39:56","L",7.0,"Julia"],["13/04/2026","21:27:30","S",6.99,"Heitor Silveira"],["13/04/2026","15:34:54","S",6.99,"Julia"],["14/04/2026","16:10:56","L",6.99,"Fernando"],["14/04/2026","21:26:46","L",7.0,"Ana Clara"],["14/04/2026","10:08:17","S",7.0,"Fernando"],["14/04/2026","20:28:35","S",6.99,"Fernando"],["14/04/2026","22:02:26","S",6.99,"Ana Clara"],["15/04/2026","13:44:40","L",7.0,"Sdriane"],["15/04/2026","14:18:04","L",7.0,"Sdriane"],["15/04/2026","14:17:21","S",6.99,"Sdriane"],["15/04/2026","15:14:05","S",6.99,"Sdriane"],["16/04/2026","19:12:13","L",7.0,"Maria Laura"],["16/04/2026","17:23:02","L",7.0,"Germana"],["16/04/2026","18:27:57","L",7.0,"Breno Rossi"],["16/04/2026","20:26:30","L",7.0,"Alexander"],["16/04/2026","23:24:14","L",7.0,"Felipe"],["16/04/2026","20:01:31","S",6.99,"Maria Laura"],["16/04/2026","17:56:02","S",6.99,"Germana"],["16/04/2026","19:07:21","S",6.99,"Breno Rossi"],["16/04/2026","21:01:24","S",6.99,"Alexander"],["17/04/2026","11:20:30","L",7.0,"Fernanda De Oliveira"],["17/04/2026","11:57:30","L",7.0,"Fernanda De Oliveira"],["17/04/2026","10:01:02","S",7.0,"Fernando"],["17/04/2026","11:55:22","S",6.99,"Fernanda De Oliveira"],["17/04/2026","12:43:40","S",6.99,"Fernanda De Oliveira"],["17/04/2026","00:05:30","S",7.0,"Luma"],["18/04/2026","10:34:16","L",7.0,"Fabio Malara"],["18/04/2026","11:38:26","L",7.0,"Fabio Malara"],["18/04/2026","11:37:38","S",6.99,"Fabio Malara"],["18/04/2026","12:55:05","S",6.99,"Fabio Malara"],["19/04/2026","10:04:02","L",7.0,"Fernando"],["19/04/2026","10:49:32","L",7.0,"Luma"],["19/04/2026","11:03:06","S",7.0,"Fernando"],["19/04/2026","11:57:22","S",7.0,"Luma"],["20/04/2026","22:37:02","L",7.0,"Fernando"],["20/04/2026","08:57:19","L",7.0,"Marcos"],["20/04/2026","09:30:38","S",6.99,"Marcos"],["21/04/2026","20:02:45","L",7.0,"Alexander"],["21/04/2026","20:49:01","L",6.99,"Alexander"],["21/04/2026","13:08:37","L",7.0,"Vinicius"],["21/04/2026","14:57:55","L",7.0,"Heloisa"],["21/04/2026","15:48:53","L",7.0,"Mariana Stella Lima"],["21/04/2026","16:33:02","L",7.0,"Beatriz"],["21/04/2026","17:21:43","L",7.0,"Mariana Stella Lima"],["21/04/2026","19:17:06","L",6.99,"Mariana Stella Lima"],["21/04/2026","23:22:09","L",7.0,"Ana Carolina"],["21/04/2026","00:43:40","S",6.99,"Fernando"],["21/04/2026","20:50:04","S",7.0,"Alexander"],["21/04/2026","21:38:48","S",6.99,"Alexander"],["21/04/2026","13:41:39","S",6.99,"Vinicius"],["21/04/2026","15:33:28","S",6.99,"Heloisa"],["21/04/2026","16:25:17","S",6.99,"Mariana Stella Lima"],["21/04/2026","17:23:12","S",7.0,"Beatriz"],["21/04/2026","18:19:56","S",7.0,"Mariana Stella Lima"],["21/04/2026","19:19:09","S",7.0,"Mariana Stella Lima"],["22/04/2026","11:03:12","L",7.0,"Fernando"],["22/04/2026","12:45:14","L",7.0,"Sdriane"],["22/04/2026","13:39:52","L",7.0,"Fernando"],["22/04/2026","19:28:27","L",7.0,"Fernando"],["22/04/2026","13:24:07","S",6.99,"Sdriane"],["22/04/2026","16:54:23","S",6.99,"Fernando"],["22/04/2026","19:29:49","S",6.99,"Fernando"],["22/04/2026","20:53:28","S",7.0,"Fernando"],["22/04/2026","00:15:11","S",6.99,"Ana Carolina"],["23/04/2026","15:39:18","L",7.0,"Germana"],["23/04/2026","07:27:17","L",7.0,"Mariana Stella Lima"],["23/04/2026","16:44:57","L",7.0,"Breno Rossi"],["23/04/2026","22:25:11","L",7.0,"Ana Clara"],["23/04/2026","16:21:03","S",6.99,"Germana"],["23/04/2026","17:24:31","S",7.0,"Germana"],["23/04/2026","07:29:23","S",6.99,"Mariana Stella Lima"],["23/04/2026","18:26:37","S",7.0,"Breno Rossi"],["23/04/2026","23:01:39","S",6.99,"Ana Clara"],["24/04/2026","12:55:11","L",7.0,"Fernando"],["24/04/2026","06:15:31","L",7.0,"Juliana"],["24/04/2026","10:09:39","L",7.0,"Duda"],["24/04/2026","13:30:45","S",6.99,"Fernando"],["24/04/2026","06:48:00","S",6.99,"Juliana"],["25/04/2026","11:31:05","L",7.0,"Fabio Malara"],["25/04/2026","12:31:14","S",6.99,"Fabio Malara"],["26/04/2026","09:09:49","L",7.0,"Vinicius Conopinski"],["26/04/2026","10:12:24","L",7.0,"Maria Laura"],["26/04/2026","11:00:28","L",6.99,"Maria Laura"],["26/04/2026","12:15:33","L",7.0,"Fernando"],["26/04/2026","12:54:35","L",7.0,"Fernando"],["26/04/2026","16:28:24","L",7.0,"Beatriz"],["26/04/2026","17:06:11","L",7.0,"Beatriz"],["26/04/2026","18:46:37","L",7.0,"Ana Carolina"],["26/04/2026","21:39:41","L",7.0,"Mariana Stella Lima"],["26/04/2026","09:43:09","S",6.99,"Vinicius Conopinski"],["26/04/2026","11:01:31","S",7.0,"Maria Laura"],["26/04/2026","12:47:51","S",6.99,"Fernando"],["26/04/2026","13:52:39","S",6.99,"Fernando"],["26/04/2026","17:04:56","S",6.99,"Beatriz"],["26/04/2026","17:53:51","S",6.99,"Beatriz"],["26/04/2026","19:25:26","S",6.99,"Ana Carolina"],["26/04/2026","21:40:47","S",6.99,"Mariana Stella Lima"],["27/04/2026","17:10:15","L",7.0,"Heitor Silveira"],["27/04/2026","17:51:27","S",6.99,"Heitor Silveira"],["28/04/2026","13:06:14","L",7.0,"Fernando"],["28/04/2026","11:20:07","L",7.0,"Alexander"],["28/04/2026","11:54:53","L",7.0,"Alexander"],["28/04/2026","15:54:19","L",7.0,"Juliana"],["28/04/2026","13:53:57","S",6.99,"Fernando"],["28/04/2026","11:54:21","S",6.99,"Alexander"],["28/04/2026","16:28:46","S",6.99,"Juliana"],["29/04/2026","11:15:07","L",7.0,"Sdriane"],["29/04/2026","17:08:03","L",7.0,"Fernanda De Oliveira"],["29/04/2026","12:11:20","L",7.0,"Sdriane"],["29/04/2026","12:10:30","S",6.99,"Sdriane"],["29/04/2026","12:57:25","S",6.99,"Sdriane"],["30/04/2026","11:58:41","L",7.0,"Fernando"],["01/05/2026","12:40:46","L",7.0,"Heloisa"],["01/05/2026","13:16:24","L",7.0,"Fernando"],["01/05/2026","20:43:52","L",7.0,"Fernando"],["01/05/2026","21:57:51","L",7.0,"Duda"],["01/05/2026","22:41:42","L",6.99,"Duda"],["01/05/2026","13:23:49","S",7.0,"Heloisa"],["01/05/2026","20:45:12","S",6.99,"Fernando"],["01/05/2026","22:42:15","S",7.0,"Duda"],["02/05/2026","12:06:45","L",6.99,"Duda"],["02/05/2026","14:20:42","S",7.0,"Duda"],["03/05/2026","11:40:02","L",7.0,"Fernando"],["03/05/2026","12:32:41","L",6.99,"Fernando"],["03/05/2026","18:35:17","L",7.0,"Ana Clara"],["03/05/2026","19:17:35","L",7.0,"Mariana Stella Lima"],["03/05/2026","20:33:44","L",7.0,"Ana Carolina"],["03/05/2026","22:17:52","L",7.0,"Mariana Stella Lima"],["03/05/2026","23:01:10","L",7.0,"Mariana Stella Lima"],["03/05/2026","12:33:58","S",7.0,"Fernando"],["03/05/2026","13:45:56","S",6.99,"Fernando"],["03/05/2026","17:35:50","S",7.0,"Fernando"],["03/05/2026","19:14:23","S",6.99,"Ana Clara"],["03/05/2026","20:10:21","S",6.99,"Mariana Stella Lima"],["03/05/2026","21:08:05","S",6.99,"Ana Carolina"],["03/05/2026","23:00:02","S",6.99,"Mariana Stella Lima"],["03/05/2026","23:52:03","S",6.99,"Mariana Stella Lima"],["04/05/2026","01:26:34","L",7.0,"Alexander"],["04/05/2026","11:24:43","L",7.0,"Fernando"],["04/05/2026","18:29:14","L",7.0,"Maria Laura"],["04/05/2026","20:29:53","L",7.0,"Mariana Stella Lima"],["04/05/2026","01:59:36","S",6.99,"Alexander"],["04/05/2026","12:18:22","S",6.99,"Fernando"],["04/05/2026","19:06:09","S",6.99,"Maria Laura"],["04/05/2026","20:31:27","S",6.99,"Mariana Stella Lima"],["05/05/2026","14:47:43","L",7.0,"Juliana"],["05/05/2026","21:55:50","L",7.0,"Mariana Stella Lima"],["05/05/2026","15:24:14","S",6.99,"Juliana"],["05/05/2026","21:56:53","S",6.99,"Mariana Stella Lima"],["06/05/2026","18:07:44","L",7.0,"Heitor Silveira"],["06/05/2026","20:05:58","L",7.0,"Fernando"],["06/05/2026","12:52:01","L",7.0,"Sdriane"],["06/05/2026","13:26:21","L",7.0,"Sdriane"],["06/05/2026","19:33:18","L",7.0,"Fernando"],["06/05/2026","20:38:33","L",6.99,"Fernando"],["06/05/2026","18:45:38","S",6.99,"Heitor Silveira"],["06/05/2026","20:03:46","S",6.99,"Fernando"],["06/05/2026","13:25:31","S",6.99,"Sdriane"],["06/05/2026","15:08:54","S",6.99,"Sdriane"],["08/05/2026","12:36:21","L",7.0,"Maria Laura"],["08/05/2026","21:33:23","L",7.0,"Fernando"],["08/05/2026","20:17:35","L",7.0,"Breno Rossi"],["08/05/2026","16:32:13","S",6.99,"Maria Laura"],["08/05/2026","22:08:18","S",6.99,"Fernando"],["08/05/2026","21:08:15","S",6.99,"Breno Rossi"],["09/05/2026","14:55:43","L",7.0,"Vinicius"],["09/05/2026","17:20:59","L",7.0,"Fernanda De Oliveira"],["09/05/2026","15:29:12","S",6.99,"Vinicius"],["10/05/2026","16:35:38","L",7.0,"Heloisa"],["10/05/2026","17:44:39","L",7.0,"Fernando"],["10/05/2026","19:20:02","L",7.0,"Ana Carolina"],["10/05/2026","19:57:29","L",7.0,"Ana Carolina"],["10/05/2026","20:43:56","L",7.0,"Mariana Stella Lima"],["10/05/2026","21:40:03","L",7.0,"Mariana Stella Lima"],["10/05/2026","17:15:28","S",6.99,"Heloisa"],["10/05/2026","19:55:29","S",6.99,"Ana Carolina"],["10/05/2026","21:39:28","S",6.99,"Mariana Stella Lima"],["10/05/2026","22:29:57","S",6.99,"Mariana Stella Lima"],["11/05/2026","14:03:46","L",7.0,"Duda"],["11/05/2026","17:34:17","L",7.0,"Fernanda De Oliveira"],["11/05/2026","19:22:46","L",7.0,"Ana Clara"],["11/05/2026","06:53:21","S",7.0,"Fabio"],["11/05/2026","17:04:39","S",6.99,"Duda"],["11/05/2026","18:07:26","S",6.99,"Fernanda De Oliveira"],["11/05/2026","19:59:44","S",6.99,"Ana Clara"],["12/05/2026","10:30:43","L",7.0,"Alexander"],["12/05/2026","14:09:36","L",7.0,"Alexander"],["12/05/2026","15:24:04","L",7.0,"Fernando"],["12/05/2026","18:21:48","L",7.0,"Gabriel Dore Mendes"],["12/05/2026","19:19:30","L",7.0,"Fernando"],["12/05/2026","23:21:11","L",6.99,"Fernando"],["12/05/2026","11:16:24","S",6.99,"Alexander"],["12/05/2026","14:43:44","S",6.99,"Alexander"],["12/05/2026","18:20:24","S",6.99,"Fernando"],["12/05/2026","19:08:26","S",6.99,"Gabriel Dore Mendes"],["12/05/2026","23:21:59","S",7.0,"Fernando"],["13/05/2026","00:32:45","L",7.0,"Fernando"],["13/05/2026","03:41:57","L",6.99,"Fernando"],["13/05/2026","12:06:07","L",7.0,"Sdriane"],["13/05/2026","12:54:26","L",7.0,"Sdriane"],["13/05/2026","20:37:10","L",7.0,"Alexander"],["13/05/2026","00:29:19","S",6.99,"Fernando"],["13/05/2026","03:42:35","S",7.0,"Fernando"],["13/05/2026","12:53:48","S",6.99,"Sdriane"],["13/05/2026","13:46:25","S",6.99,"Sdriane"],["13/05/2026","21:15:18","S",6.99,"Alexander"],["14/05/2026","14:17:18","L",7.0,"Gabriel Dore Mendes"],["14/05/2026","17:36:28","L",7.0,"Mariana Stella Lima"],["14/05/2026","19:11:01","L",7.0,"Mariana Stella Lima"],["14/05/2026","21:04:55","L",7.0,"Mariana Stella Lima"],["14/05/2026","14:54:35","S",6.99,"Gabriel Dore Mendes"],["14/05/2026","17:38:00","S",6.99,"Mariana Stella Lima"],["14/05/2026","19:12:37","S",6.99,"Mariana Stella Lima"],["14/05/2026","21:06:12","S",6.99,"Mariana Stella Lima"],["16/05/2026","10:53:28","L",7.0,"Fabio Malara"],["16/05/2026","11:32:46","L",7.0,"Fabio Malara"],["16/05/2026","12:16:30","L",7.0,"Mariana Stella Lima"],["16/05/2026","13:49:55","L",6.99,"Mariana Stella Lima"],["16/05/2026","14:45:32","L",7.0,"Heloisa"],["16/05/2026","18:01:47","L",7.0,"Germana"],["16/05/2026","18:39:43","L",6.99,"Germana"],["16/05/2026","11:31:39","S",6.99,"Fabio Malara"],["16/05/2026","12:53:40","S",7.0,"Fabio Malara"],["16/05/2026","13:49:19","S",7.0,"Mariana Stella Lima"],["16/05/2026","14:46:21","S",7.0,"Mariana Stella Lima"],["16/05/2026","15:36:09","S",7.0,"Heloisa"],["16/05/2026","18:40:21","S",7.0,"Germana"],["16/05/2026","19:31:13","S",6.99,"Germana"],["17/05/2026","08:37:38","L",7.0,"Fabio Malara"],["17/05/2026","11:26:49","L",7.0,"Fernando"],["17/05/2026","13:23:08","L",7.0,"Alexander"],["17/05/2026","14:25:10","L",7.0,"Ana Carolina"],["17/05/2026","15:33:22","L",7.0,"Vinicius"],["17/05/2026","20:11:02","L",7.0,"Fernanda De Oliveira"],["17/05/2026","09:51:40","S",6.99,"Fabio Malara"],["17/05/2026","12:29:22","S",6.99,"Fernando"],["17/05/2026","14:01:03","S",6.99,"Alexander"],["17/05/2026","15:18:40","S",6.99,"Ana Carolina"],["17/05/2026","16:23:13","S",6.99,"Vinicius"],["17/05/2026","20:45:12","S",6.99,"Fernanda De Oliveira"],["18/05/2026","16:56:54","L",7.0,"Heitor Silveira"],["18/05/2026","13:55:40","L",7.0,"Juliana"],["18/05/2026","17:34:32","S",6.99,"Heitor Silveira"],["18/05/2026","14:32:54","S",6.99,"Juliana"],["19/05/2026","19:39:17","L",7.0,"Maria Laura"],["19/05/2026","20:26:56","L",6.99,"Maria Laura"],["19/05/2026","20:27:53","S",7.0,"Maria Laura"],["19/05/2026","21:15:13","S",6.99,"Maria Laura"],["19/05/2026","19:30:39","S",7.0,"Gerlany"],["20/05/2026","11:10:43","L",7.0,"Sdriane"],["20/05/2026","12:10:00","L",7.0,"Sdriane"],["20/05/2026","12:09:10","S",6.99,"Sdriane"],["20/05/2026","12:56:04","S",6.99,"Sdriane"],["21/05/2026","10:48:33","L",7.0,"Fernando"],["21/05/2026","12:03:12","L",7.0,"Mariana Stella Lima"],["21/05/2026","13:34:14","L",7.0,"Mariana Stella Lima"],["21/05/2026","14:16:29","L",7.0,"Ana Clara"],["21/05/2026","15:55:37","L",7.0,"Juliana"],["21/05/2026","20:00:15","L",7.0,"Fernando"],["21/05/2026","11:20:06","S",6.99,"Fernando"],["21/05/2026","12:38:32","S",6.99,"Mariana Stella Lima"],["21/05/2026","13:36:11","S",6.99,"Mariana Stella Lima"],["21/05/2026","15:11:00","S",6.99,"Ana Clara"],["22/05/2026","10:36:41","L",6.99,"Fernando"],["22/05/2026","15:41:18","L",7.0,"Alexander"],["22/05/2026","17:03:31","L",7.0,"Alexander"],["22/05/2026","18:30:44","L",7.0,"Breno Rossi"],["22/05/2026","10:37:23","S",7.0,"Fernando"],["22/05/2026","11:48:08","S",6.99,"Fernando"],["22/05/2026","16:15:48","S",6.99,"Alexander"],["22/05/2026","17:38:14","S",6.99,"Alexander"],["22/05/2026","19:07:50","S",6.99,"Breno Rossi"],["23/05/2026","11:30:50","L",7.0,"Fabio Malara"],["23/05/2026","13:39:04","L",7.0,"Germana"],["23/05/2026","15:46:54","L",7.0,"Julia"],["23/05/2026","12:20:03","S",6.99,"Fabio Malara"],["23/05/2026","14:27:29","S",6.99,"Germana"],["23/05/2026","16:18:45","S",6.99,"Julia"],["24/05/2026","10:12:48","L",7.0,"Heloisa"],["24/05/2026","12:31:48","L",7.0,"Ana Carolina"],["24/05/2026","10:52:11","S",6.99,"Heloisa"],["24/05/2026","13:16:08","S",6.99,"Ana Carolina"],["25/05/2026","12:14:43","L",7.0,"Fernando"],["25/05/2026","20:58:17","L",6.99,"Fernando"],["25/05/2026","10:57:25","L",7.0,"Juliana"],["25/05/2026","11:35:54","L",7.0,"Juliana"],["25/05/2026","13:10:44","S",7.0,"Fernando"],["25/05/2026","21:49:00","S",7.0,"Fernando"],["25/05/2026","11:35:09","S",6.99,"Juliana"],["25/05/2026","12:22:42","S",7.0,"Juliana"],["26/05/2026","08:46:47","L",7.0,"Mariana Stella Lima"],["26/05/2026","11:36:04","L",7.0,"Fernando"],["26/05/2026","09:21:06","S",6.99,"Mariana Stella Lima"],["26/05/2026","12:30:31","S",6.99,"Fernando"],["27/05/2026","17:02:12","L",7.0,"Maria Laura"],["27/05/2026","12:05:53","L",7.0,"Sdriane"],["27/05/2026","12:52:29","L",7.0,"Sdriane"],["27/05/2026","18:12:20","L",7.0,"Alexander"],["27/05/2026","12:51:48","S",6.99,"Sdriane"],["27/05/2026","13:57:04","S",6.99,"Sdriane"],["27/05/2026","17:35:12","S",6.99,"Maria Laura"],["27/05/2026","18:45:18","S",6.99,"Alexander"],["28/05/2026","21:27:24","L",7.0,"Heitor Silveira"],["28/05/2026","12:10:43","L",7.0,"Mariana Stella Lima"],["28/05/2026","13:38:24","L",7.0,"Mariana Stella Lima"],["28/05/2026","15:20:33","L",7.0,"Mariana Stella Lima"],["28/05/2026","16:36:07","L",7.0,"Duda"],["28/05/2026","17:20:01","L",7.0,"Duda"],["28/05/2026","18:19:22","L",7.0,"Duda"],["28/05/2026","22:08:46","S",6.99,"Heitor Silveira"],["28/05/2026","12:11:41","S",6.99,"Mariana Stella Lima"],["28/05/2026","13:39:49","S",6.99,"Mariana Stella Lima"],["28/05/2026","15:21:36","S",6.99,"Mariana Stella Lima"],["28/05/2026","17:19:26","S",6.99,"Duda"],["28/05/2026","18:15:50","S",6.99,"Duda"],["28/05/2026","19:03:36","S",6.99,"Duda"],["29/05/2026","13:02:19","S",7.0,"Fernando"],["30/05/2026","10:48:02","L",7.0,"Fabio Malara"],["30/05/2026","11:26:45","S",6.99,"Fabio Malara"],["31/05/2026","18:38:40","L",7.0,"Germana"],["31/05/2026","12:43:03","L",7.0,"Ana Carolina"],["31/05/2026","13:30:40","L",6.99,"Ana Carolina"],["31/05/2026","14:22:46","L",7.0,"Fernanda De Oliveira"],["31/05/2026","21:56:54","L",7.0,"Vinicius"],["31/05/2026","19:15:08","S",6.99,"Germana"],["31/05/2026","14:07:40","S",7.0,"Ana Carolina"],["31/05/2026","22:31:39","S",6.99,"Vinicius"],["01/06/2026","07:34:19","L",7.0,"Maria Laura"],["01/06/2026","18:04:05","L",7.0,"Germana"],["01/06/2026","15:10:46","L",7.0,"Juliana"],["01/06/2026","16:30:01","L",6.99,"Juliana"],["01/06/2026","08:12:58","S",6.99,"Maria Laura"],["01/06/2026","18:39:08","S",6.99,"Germana"],["01/06/2026","17:07:45","S",7.0,"Juliana"],["02/06/2026","07:53:01","L",7.0,"Mariana Stella Lima"],["02/06/2026","12:19:50","L",7.0,"Alexander"],["02/06/2026","14:28:45","L",7.0,"Ana Clara"],["02/06/2026","16:16:30","L",7.0,"Adriana"],["02/06/2026","17:01:26","L",7.0,"Adriana"],["02/06/2026","07:54:56","S",6.99,"Mariana Stella Lima"],["02/06/2026","12:52:13","S",6.99,"Alexander"],["02/06/2026","15:10:39","S",6.99,"Ana Clara"],["02/06/2026","16:59:11","S",6.99,"Adriana"],["02/06/2026","17:47:12","S",6.99,"Adriana"],["03/06/2026","10:06:22","L",7.0,"Heloisa"],["03/06/2026","10:44:21","S",6.99,"Heloisa"],["04/06/2026","11:24:03","L",7.0,"Mariana Stella Lima"],["04/06/2026","12:51:59","L",7.0,"Mariana Stella Lima"],["04/06/2026","14:43:57","L",7.0,"Mariana Stella Lima"],["04/06/2026","18:59:58","L",7.0,"Ana Carolina"],["04/06/2026","11:24:54","S",6.99,"Mariana Stella Lima"],["04/06/2026","12:52:47","S",6.99,"Mariana Stella Lima"],["04/06/2026","14:45:24","S",6.99,"Mariana Stella Lima"],["04/06/2026","20:06:30","S",6.99,"Ana Carolina"],["06/06/2026","07:08:51","L",7.0,"Fabio"],["06/06/2026","10:34:43","L",7.0,"Fabio Malara"],["06/06/2026","11:25:46","L",7.0,"Fabio Malara"],["06/06/2026","07:40:52","S",6.99,"Fabio"],["06/06/2026","11:24:44","S",6.99,"Fabio Malara"],["06/06/2026","13:27:01","S",6.99,"Fabio Malara"],["07/06/2026","10:23:08","L",7.0,"Maria Laura"],["07/06/2026","10:55:57","L",7.0,"Maria Laura"],["07/06/2026","20:52:16","L",7.0,"Ana Carolina"],["07/06/2026","22:14:07","L",6.99,"Ana Carolina"],["07/06/2026","10:53:58","S",6.99,"Maria Laura"],["07/06/2026","11:42:04","S",6.99,"Maria Laura"],["07/06/2026","22:50:47","S",7.0,"Ana Carolina"],["08/06/2026","14:00:43","L",7.0,"Fernando"],["08/06/2026","16:53:00","L",7.0,"Fernando"],["08/06/2026","14:38:24","S",6.99,"Fernando"],["08/06/2026","18:13:05","S",6.99,"Fernando"],["08/06/2026","21:16:27","S",7.0,"Ana Carolina"],["09/06/2026","15:54:23","L",7.0,"Juliana"],["09/06/2026","21:32:36","L",7.0,"Mariana Stella Lima"],["09/06/2026","16:31:30","S",6.99,"Juliana"],["09/06/2026","21:34:07","S",6.99,"Mariana Stella Lima"],["10/06/2026","18:32:44","L",7.0,"Breno Rossi"],["10/06/2026","19:07:46","S",6.99,"Breno Rossi"],["11/06/2026","21:27:25","L",7.0,"Heitor Silveira"],["11/06/2026","14:56:28","L",7.0,"Juliana"],["11/06/2026","22:06:30","S",6.99,"Heitor Silveira"],["11/06/2026","15:30:35","S",6.99,"Juliana"],["13/06/2026","07:03:39","L",7.0,"Fabio"],["13/06/2026","12:10:44","L",7.0,"Fabio Malara"],["13/06/2026","15:19:54","L",7.0,"Alexander"],["13/06/2026","15:53:29","L",7.0,"Alexander"],["13/06/2026","07:47:25","S",6.99,"Fabio"],["13/06/2026","13:38:20","S",6.99,"Fabio Malara"],["13/06/2026","15:49:29","S",6.99,"Alexander"],["13/06/2026","16:40:52","S",6.99,"Alexander"],["14/06/2026","11:14:44","L",7.0,"Duda"],["14/06/2026","12:05:46","L",6.99,"Duda"],["14/06/2026","12:55:23","L",6.99,"Duda"],["14/06/2026","13:47:52","L",7.0,"Duda"],["14/06/2026","14:36:51","L",7.0,"Duda"],["14/06/2026","15:16:34","L",7.0,"Duda"],["14/06/2026","16:03:39","L",7.0,"Fernanda De Oliveira"],["14/06/2026","18:58:21","L",7.0,"Alexander"],["14/06/2026","19:34:15","L",7.0,"Mariana Stella Lima"],["14/06/2026","20:06:43","L",7.0,"Duda"],["14/06/2026","21:12:55","L",6.99,"Mariana Stella Lima"],["14/06/2026","23:32:38","L",7.0,"Ana Carolina"],["14/06/2026","12:54:20","S",7.0,"Duda"],["14/06/2026","13:48:26","S",6.99,"Duda"],["14/06/2026","14:37:24","S",6.99,"Duda"],["14/06/2026","15:56:33","S",6.99,"Duda"],["14/06/2026","16:47:05","S",6.99,"Fernanda De Oliveira"],["14/06/2026","19:31:24","S",6.99,"Alexander"],["14/06/2026","20:22:12","S",7.0,"Mariana Stella Lima"],["14/06/2026","21:16:05","S",7.0,"Duda"],["14/06/2026","22:10:03","S",7.0,"Mariana Stella Lima"],["15/06/2026","10:30:17","L",7.0,"Juliana"],["15/06/2026","20:47:29","L",7.0,"Mariana Stella Lima"],["15/06/2026","00:07:36","S",6.99,"Ana Carolina"],["15/06/2026","11:04:28","S",6.99,"Juliana"],["15/06/2026","20:49:21","S",6.99,"Mariana Stella Lima"],["16/06/2026","10:36:46","L",7.0,"Adriana"],["16/06/2026","11:14:12","L",7.0,"Adriana"],["16/06/2026","11:10:51","S",6.99,"Adriana"],["16/06/2026","12:07:12","S",6.99,"Adriana"],["17/06/2026","09:55:20","L",7.0,"Maria Laura"],["17/06/2026","11:31:49","L",7.0,"Enara"],["17/06/2026","12:14:54","L",7.0,"Enara"],["17/06/2026","12:47:58","L",6.99,"Enara"],["17/06/2026","13:30:37","L",6.99,"Enara"],["17/06/2026","21:03:39","L",7.0,"Mariana Stella Lima"],["17/06/2026","10:28:34","S",6.99,"Maria Laura"],["17/06/2026","12:08:10","S",6.99,"Enara"],["17/06/2026","12:59:25","S",7.0,"Enara"],["17/06/2026","13:47:18","S",7.0,"Enara"],["17/06/2026","14:34:48","S",6.99,"Enara"],["17/06/2026","21:04:32","S",6.99,"Mariana Stella Lima"],["18/06/2026","10:21:58","L",7.0,"Mariana Stella Lima"],["18/06/2026","10:22:38","S",6.99,"Mariana Stella Lima"]];
+
+const NR_TOLERANCIA_SEG = 120;   // diferença máxima de horário para casar (aprox.)
+let nrConciliacao = { total: 0, exato: 0, aprox: 0, jaNR: 0, incluidas: 0, offsetH: 0, linhas: [] };
+
+function nrNormNome(s) { return cleanStrResident(s).toLowerCase().replace(/\s+/g, ' ').trim(); }
+
+// Casa cada operação da planilha com uma transação do VendTEF (1 para 1):
+//   1º horário idêntico (mesmo dia e segundo) + mesmo tipo de máquina
+//   2º horário até ±2 min, mesmo tipo e mesmo valor (desempate pelo nome do usuário)
+//   3º sem par → a operação é incluída no histórico como NR (fonte "Planilha NR")
+// Também testa deslocamento de fuso (−3h/+3h) e usa o que mais casar.
+function conciliarNR() {
+  const cand = rawTransactions.filter(t => t.condoKey === 'PUQ_PERDIZES');
+  const nrItens = NR_PLANILHA.map((n, idx) => {
+    const dt = parseDateBR(n[0], n[1]);
+    return { idx, dataStr: n[0], horaStr: n[1], isWash: n[2] === 'L', valor: +n[3], usuario: n[4] || '', ts: dt ? dt.getTime() : NaN };
+  }).filter(n => !isNaN(n.ts));
+
+  // índice por tipo de máquina e minuto para busca rápida
+  const buildIdx = () => {
+    const idx = {};
+    cand.forEach(t => {
+      const k = `${t.isWash ? 'L' : 'S'}|${Math.floor(t.timestamp / 60000)}`;
+      (idx[k] = idx[k] || []).push(t);
+    });
+    return idx;
+  };
+  const idx = buildIdx();
+
+  const tentar = (offsetMs, aplicar) => {
+    const usados = new Set();
+    const res = [];
+    nrItens.forEach(n => {
+      const ts = n.ts + offsetMs;
+      const tipo = n.isWash ? 'L' : 'S';
+      const min = Math.floor(ts / 60000);
+      let melhor = null, melhorScore = Infinity, modo = null;
+      for (let m = min - 2; m <= min + 2; m++) {
+        (idx[`${tipo}|${m}`] || []).forEach(t => {
+          if (usados.has(t)) return;
+          const diff = Math.abs(t.timestamp - ts) / 1000;
+          if (diff > NR_TOLERANCIA_SEG) return;
+          const exato = diff < 1;
+          if (!exato && Math.abs(t.valor - n.valor) > 0.02) return;
+          const mesmoNome = n.usuario && nrNormNome(t.morador).includes(nrNormNome(n.usuario).split(' ')[0]);
+          const score = diff - (mesmoNome ? 30 : 0);
+          if (score < melhorScore) { melhorScore = score; melhor = t; modo = exato ? 'exato' : 'aprox'; }
+        });
+      }
+      if (melhor) usados.add(melhor);
+      res.push({ n, t: melhor, modo: melhor ? modo : 'incluida' });
+    });
+    return res;
+  };
+
+  // escolhe o deslocamento de fuso com mais casamentos
+  let melhorOffset = 0, melhorRes = null, melhorQtd = -1;
+  [0, -3, 3].forEach(h => {
+    const r = tentar(h * 3600000);
+    const q = r.filter(x => x.t).length;
+    if (q > melhorQtd) { melhorQtd = q; melhorRes = r; melhorOffset = h; }
+  });
+
+  const c = { total: nrItens.length, exato: 0, aprox: 0, jaNR: 0, incluidas: 0, offsetH: melhorOffset, linhas: [] };
+  melhorRes.forEach(({ n, t, modo }) => {
+    if (t) {
+      if (t.isNR) c.jaNR++;
+      t.isNR = true;
+      t.nrMatch = modo;
+      if ((!t.morador || t.morador === 'Não Identificado') && n.usuario) t.morador = n.usuario;
+      if (modo === 'exato') c.exato++; else c.aprox++;
+      c.linhas.push({ status: modo === 'exato' ? 'Casada (horário exato)' : 'Casada (±2 min)', n, t });
+    } else {
+      const dt = new Date(n.ts);
+      const res = extractResidentAndApt(n.usuario, '', 'PUQ_PERDIZES');
+      const novo = {
+        id: `NR-${n.idx}`, source: 'Planilha NR', condoKey: 'PUQ_PERDIZES', condoNome: 'PUQ Perdizes',
+        dataStr: n.dataStr, horaStr: n.horaStr, dateObj: dt, timestamp: n.ts,
+        year: dt.getFullYear(), month: dt.getMonth() + 1,
+        tipoMaquina: n.isWash ? 'Lavadora' : 'Secadora', isWash: n.isWash, torre: n.isWash ? 'NR - Lavadora 1' : 'NR - Secadora 1',
+        morador: n.usuario || 'Não Identificado', apartamento: res.apt,
+        valor: n.valor, repasse: n.valor > 0 ? REPASSE_VALOR_UNITARIO : 0,
+        pagamento: 'NR (ERP)', isNR: true, nrMatch: 'incluida', rawRow: []
+      };
+      rawTransactions.push(novo);
+      c.incluidas++;
+      c.linhas.push({ status: 'Incluída (sem par no VendTEF)', n, t: novo });
+    }
+  });
+  nrConciliacao = c;
+  console.log('Conciliação NR:', c);
+}
+
+// Operações NR: identificadas pelo sufixo "NR" no produto (ex.: "Lavadora NR", "Secadora NR")
+// Molas exclusivas do NR no PUQ Perdizes
+const MOLAS_NR = {
+  '25084': { torre: 'NR - Lavadora 1', isWash: true },
+  '25085': { torre: 'NR - Secadora 1', isWash: false }
+};
+function molaCode(r) { return String(r[6] || '').trim().split(/\s+/)[0]; }
+
+function isNRRow(r) {
+  if (MOLAS_NR[molaCode(r)]) return true;
+  const campos = [r[5], r[1], r[6]];
+  return campos.some(c => /(^|[\s\-_/])NR($|[\s\-_/])/i.test(String(c || '').trim()));
+}
+
+function processSourceRows(rows, sourceName) {
+  // Ignora cabeçalho
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    if (r.length < 12) continue;
+    if (r[0] === 'Cliente' || r[1] === 'Máquina') continue;
+
+    const cliente = (r[0] || '').toLowerCase();
+    const maquina = (r[1] || '').toLowerCase();
+    const matricula = (r[21] || '').trim();
+    const mola = (r[6] || '').trim();
+
+    const dataStr = r[11] || '';
+    const horaStr = r[12] || '';
+    const dt = parseDateBR(dataStr, horaStr);
+    if (!dt) continue;
+
+    let condoKey = null;
+    let condoNome = '';
+
+    const isAfterOrOn23Sep2026 = dt >= new Date(2026, 8, 23); // 23/09/2026
+
+    // Ignora You Go (este relatório é exclusivo do PUQ Perdizes)
+    if (
+      cliente.includes('you go') || 
+      maquina.includes('you go') || 
+      maquina.includes('34#') ||
+      MATRICULAS_YOU_GO[matricula] ||
+      mola.includes('25345') ||
+      (mola.includes('25469') && isAfterOrOn23Sep2026)
+    ) {
+      continue;
+    }
+    // Verifica PUQ Perdizes
+    else if (
+      cliente.includes('perdizes') || 
+      cliente.includes('puq') || 
+      maquina.includes('perdizes') || 
+      maquina.includes('puq') ||
+      maquina.includes('31#') ||
+      MOLAS_NR[molaCode(r)]
+    ) {
+      condoKey = 'PUQ_PERDIZES';
+      condoNome = 'PUQ Perdizes';
+    }
+
+    if (!condoKey) continue;
+
+    const maqInfo = detectMachineType(r);
+    const isNR = isNRRow(r);
+    const molaNR = MOLAS_NR[molaCode(r)];
+    if (molaNR) { maqInfo.isWash = molaNR.isWash; maqInfo.type = molaNR.isWash ? 'Lavadora' : 'Secadora'; }
+    const residentInfo = extractResidentAndApt(r[19], r[14], condoKey);
+    const valor = parseNumber(r[9] || r[7] || 0);
+    const repasse = valor > 0 ? REPASSE_VALOR_UNITARIO : 0;
+    const pagamento = r[4] || r[16] || 'TEF';
+
+    rawTransactions.push({
+      id: `${sourceName}-${i}`,
+      source: sourceName,
+      condoKey,
+      condoNome,
+      dataStr,
+      horaStr,
+      dateObj: dt,
+      timestamp: dt.getTime(),
+      year: dt.getFullYear(),
+      month: dt.getMonth() + 1,
+      tipoMaquina: maqInfo.type,
+      isWash: maqInfo.isWash,
+      torre: (MOLAS_NR[molaCode(r)] || {}).torre || maqInfo.torre || (condoKey === 'PUQ_PERDIZES' ? 'Torre PUQ' : 'You Go'),
+      morador: residentInfo.name,
+      apartamento: residentInfo.apt,
+      valor,
+      repasse,
+      pagamento,
+      isNR,
+      rawRow: r
+    });
+  }
+}
+// ══════════════════════════════════════════════════════
+// FILTROS
+// ══════════════════════════════════════════════════════
+const MESES_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const MESES_PT_LONGO = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function fmtBRL(num) {
+  return (num || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+function fmtInt(n) { return (n || 0).toLocaleString('pt-BR'); }
+function fmtDate(d) {
+  const p = n => String(n).padStart(2, '0');
+  return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`;
+}
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function initFlatpickr() {
+  const commonCfg = {
+    dateFormat: 'd/m/Y',
+    locale: 'pt',
+    allowInput: true,
+    onChange: function () { clearActivePills(); applyFilters(); }
+  };
+  fpStart = flatpickr('#date-start', commonCfg);
+  fpEnd = flatpickr('#date-end', commonCfg);
+}
+
+function buildYearPills() {
+  const wrap = document.getElementById('quick-pills');
+  const years = [...new Set(rawTransactions.map(t => t.year))].sort((a, b) => b - a);
+  years.forEach(y => {
+    const b = document.createElement('button');
+    b.className = 'btn-pill';
+    b.dataset.period = `year_${y}`;
+    b.textContent = `Ano ${y}`;
+    b.onclick = () => setQuickPeriod(`year_${y}`);
+    wrap.appendChild(b);
+  });
+}
+
+function updatePeriodoDados() {
+  const el = document.getElementById('periodo-dados');
+  document.getElementById('gerado-em').textContent = new Date().toLocaleString('pt-BR');
+  if (!rawTransactions.length) { el.textContent = 'Nenhum dado encontrado'; return; }
+  const first = rawTransactions[rawTransactions.length - 1].dateObj;
+  const last = rawTransactions[0].dateObj;
+  el.innerHTML = `<i class="fas fa-database"></i> Dados de ${fmtDate(first)} a ${fmtDate(last)}`;
+}
+
+function clearActivePills() {
+  document.querySelectorAll('.btn-pill').forEach(b => b.classList.remove('active'));
+}
+
+function setQuickPeriod(period) {
+  clearActivePills();
+  const btn = document.querySelector(`.btn-pill[data-period="${period}"]`);
+  if (btn) btn.classList.add('active');
+  const now = new Date();
+
+  if (period === 'all') {
+    fpStart.clear(); fpEnd.clear();
+  } else if (period === 'this_month') {
+    fpStart.setDate(new Date(now.getFullYear(), now.getMonth(), 1));
+    fpEnd.setDate(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+  } else if (period === 'last_month') {
+    fpStart.setDate(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+    fpEnd.setDate(new Date(now.getFullYear(), now.getMonth(), 0));
+  } else if (period === '12m') {
+    fpStart.setDate(new Date(now.getFullYear(), now.getMonth() - 11, 1));
+    fpEnd.setDate(now);
+  } else if (period.startsWith('year_')) {
+    const y = parseInt(period.slice(5), 10);
+    fpStart.setDate(new Date(y, 0, 1));
+    fpEnd.setDate(new Date(y, 11, 31));
+  }
+  applyFilters();
+}
+
+function resetFilters() {
+  document.getElementById('filter-maq-type').value = 'all';
+  document.getElementById('search-resident').value = '';
+  setQuickPeriod('all');
+}
+
+// Base do período (sem busca textual) — alimenta KPIs, gráficos e histórico
+let periodTransactions = [];
+
+// Segmento: PUQ (regular, sem NR) | NR | ALL (consolidado)
+let currentSegment = 'PUQ';
+const SEG_INFO = {
+  PUQ: { titulo: 'PUQ Perdizes', desc: 'Operações regulares do condomínio (sem NR)', arquivo: 'puq_perdizes' },
+  NR:  { titulo: 'PUQ Perdizes — NR', desc: 'Operações NR: produto NR no VendTEF + cruzamento com a planilha ERP Vending', arquivo: 'puq_perdizes_nr' },
+  ALL: { titulo: 'PUQ Perdizes — Consolidado', desc: 'PUQ Perdizes + NR', arquivo: 'puq_perdizes_consolidado' }
+};
+function inSegment(item, seg = currentSegment) {
+  if (seg === 'PUQ') return !item.isNR;
+  if (seg === 'NR') return item.isNR;
+  return true;
+}
+function setSegment(seg) {
+  currentSegment = seg;
+  document.querySelectorAll('.btn-seg').forEach(b => b.classList.toggle('active', b.dataset.seg === seg));
+  document.getElementById('titulo-seg').textContent = SEG_INFO[seg].titulo;
+  document.getElementById('seg-desc').textContent = SEG_INFO[seg].desc;
+  document.title = `LAVAÍ — ${SEG_INFO[seg].titulo}`;
+  applyFilters();
+}
+
+function applyFilters() {
+  const maqVal = document.getElementById('filter-maq-type').value;
+  const searchVal = (document.getElementById('search-resident').value || '').toLowerCase().trim();
+  const startDate = fpStart && fpStart.selectedDates.length ? new Date(fpStart.selectedDates[0]) : null;
+  const endDate = fpEnd && fpEnd.selectedDates.length ? new Date(fpEnd.selectedDates[0]) : null;
+  if (startDate) startDate.setHours(0, 0, 0, 0);
+  if (endDate) endDate.setHours(23, 59, 59, 999);
+
+  const base = rawTransactions.filter(item => {
+    if (maqVal === 'wash' && !item.isWash) return false;
+    if (maqVal === 'dry' && item.isWash) return false;
+    if (startDate && item.dateObj < startDate) return false;
+    if (endDate && item.dateObj > endDate) return false;
+    return true;
+  });
+
+  // contadores dos botões (respeitam período e tipo de máquina)
+  ['PUQ', 'NR', 'ALL'].forEach(sg => {
+    document.getElementById(`seg-count-${sg}`).textContent = fmtInt(base.filter(it => inSegment(it, sg)).length);
+  });
+  periodTransactions = base.filter(it => inSegment(it));
+
+  filteredTransactions = !searchVal ? periodTransactions : periodTransactions.filter(item =>
+    item.morador.toLowerCase().includes(searchVal) ||
+    item.apartamento.toLowerCase().includes(searchVal) ||
+    item.dataStr.includes(searchVal)
+  );
+
+  currentPage = 1;
+  updateDashboardUI();
+}
+
+// ══════════════════════════════════════════════════════
+// AGREGAÇÕES
+// ══════════════════════════════════════════════════════
+function groupByMonth(items) {
+  const map = {};
+  items.forEach(it => {
+    const key = `${it.year}-${String(it.month).padStart(2, '0')}`;
+    if (!map[key]) map[key] = { key, year: it.year, month: it.month, wash: 0, dry: 0, ops: 0, fat: 0, repasse: 0 };
+    const g = map[key];
+    if (it.isWash) g.wash++; else g.dry++;
+    g.ops++; g.fat += it.valor; g.repasse += it.repasse;
+  });
+  return Object.values(map).sort((a, b) => a.key.localeCompare(b.key));
+}
+
+function groupByApt(items) {
+  const map = {};
+  items.forEach(it => {
+    const apt = it.apartamento && it.apartamento !== 'Não Informado' ? it.apartamento : 'Não Informado';
+    if (!map[apt]) map[apt] = { apt, nomes: {}, wash: 0, dry: 0, ops: 0, repasse: 0, last: 0 };
+    const g = map[apt];
+    const nome = (it.morador || '').trim();
+    if (nome && nome !== 'Não Identificado') g.nomes[nome] = (g.nomes[nome] || 0) + 1;
+    if (it.isWash) g.wash++; else g.dry++;
+    g.ops++; g.repasse += it.repasse;
+    if (it.timestamp > g.last) g.last = it.timestamp;
+  });
+  return Object.values(map).sort((a, b) => {
+    if (a.apt === 'Não Informado') return 1;
+    if (b.apt === 'Não Informado') return -1;
+    return b.ops - a.ops;
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// INTERFACE
+// ══════════════════════════════════════════════════════
+function updateDashboardUI() {
+  const items = periodTransactions;
+  const ops = items.length;
+  const wash = items.filter(r => r.isWash).length;
+  const dry = ops - wash;
+  const repasse = items.reduce((s, r) => s + r.repasse, 0);
+  const fat = items.reduce((s, r) => s + r.valor, 0);
+  const meses = groupByMonth(items);
+
+  document.getElementById('kpi-repasse').textContent = fmtBRL(repasse);
+  if (currentSegment === 'ALL') {
+    const rNR = items.filter(r => r.isNR).reduce((s, r) => s + r.repasse, 0);
+    document.getElementById('kpi-repasse-sub').textContent = `PUQ ${fmtBRL(repasse - rNR)} • NR ${fmtBRL(rNR)}`;
+  } else {
+    document.getElementById('kpi-repasse-sub').textContent = 'R$ 2,00 por operação paga';
+  }
+  document.getElementById('kpi-ops').textContent = fmtInt(ops);
+  document.getElementById('kpi-ops-sub').textContent = `${fmtInt(wash)} lavagens • ${fmtInt(dry)} secagens`;
+  document.getElementById('kpi-fat').textContent = fmtBRL(fat);
+  document.getElementById('kpi-fat-sub').textContent = `Ticket médio ${fmtBRL(ops ? fat / ops : 0)}`;
+  document.getElementById('kpi-media').textContent = fmtBRL(meses.length ? repasse / meses.length : 0);
+  document.getElementById('kpi-media-sub').textContent = `${meses.length} ${meses.length === 1 ? 'mês' : 'meses'} com operação • ${fmtInt(meses.length ? Math.round(ops / meses.length) : 0)} ops/mês`;
+
+  if (meses.length) {
+    const best = meses.reduce((a, b) => (b.repasse > a.repasse ? b : a));
+    document.getElementById('kpi-best').textContent = fmtBRL(best.repasse);
+    document.getElementById('kpi-best-sub').textContent = `${MESES_PT_LONGO[best.month - 1]}/${best.year} • ${fmtInt(best.ops)} operações`;
+  } else {
+    document.getElementById('kpi-best').textContent = '—';
+    document.getElementById('kpi-best-sub').textContent = '—';
+  }
+
+  const fmtL = ml => (ml / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' L';
+  const mlDet = wash * ML_DETERGENTE_POR_LAVAGEM;
+  const mlAma = wash * ML_AMACIANTE_POR_LAVAGEM;
+  document.getElementById('kpi-quimicos').textContent = fmtL(mlDet + mlAma);
+  document.getElementById('kpi-quimicos-sub').textContent = `${fmtL(mlDet)} detergente • ${fmtL(mlAma)} amaciante`;
+
+  renderNRTable();
+  renderMensalTable(meses);
+  renderAnalyticTable();
+  renderTimelineChart(meses);
+  renderMixChart(wash, dry);
+}
+
+function renderMensalTable(meses) {
+  const tbody = document.getElementById('mensal-tbody');
+  document.getElementById('mensal-count').textContent = `${meses.length} ${meses.length === 1 ? 'mês' : 'meses'}`;
+  if (!meses.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-dim)">Sem operações no período.</td></tr>`;
+    return;
+  }
+  const rows = meses.map(m => ({ html: `
+      <tr>
+        <td><strong>${MESES_PT[m.month - 1]}/${m.year}</strong></td>
+        <td>${fmtInt(m.wash)}</td>
+        <td>${fmtInt(m.dry)}</td>
+        <td><strong>${fmtInt(m.ops)}</strong></td>
+        <td>${fmtBRL(m.fat)}</td>
+        <td><span class="badge-repasse-val">${fmtBRL(m.repasse)}</span></td>
+      </tr>` }));
+  // mais recente primeiro
+  const tot = meses.reduce((t, m) => ({ wash: t.wash + m.wash, dry: t.dry + m.dry, ops: t.ops + m.ops, fat: t.fat + m.fat, rep: t.rep + m.repasse }), { wash: 0, dry: 0, ops: 0, fat: 0, rep: 0 });
+  tbody.innerHTML = rows.reverse().map(r => r.html).join('') + `
+    <tr class="total-row">
+      <td>TOTAL</td><td>${fmtInt(tot.wash)}</td><td>${fmtInt(tot.dry)}</td><td>${fmtInt(tot.ops)}</td>
+      <td>${fmtBRL(tot.fat)}</td><td><span class="badge-repasse-val" style="font-size:14px">${fmtBRL(tot.rep)}</span></td>
+    </tr>`;
+}
+
+function renderAnalyticTable() {
+  const tbody = document.getElementById('analytic-tbody');
+  const total = filteredTransactions.length;
+  document.getElementById('table-total-count').textContent = `${fmtInt(total)} registros`;
+  if (!total) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px 20px;color:var(--text-dim)"><i class="fas fa-inbox" style="font-size:32px;margin-bottom:10px;display:block"></i>Nenhuma transação encontrada para os filtros selecionados.</td></tr>`;
+    renderPagination(0);
+    return;
+  }
+  const totalPages = Math.ceil(total / pageSize);
+  currentPage = Math.min(Math.max(currentPage, 1), totalPages);
+  const pageItems = filteredTransactions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  tbody.innerHTML = pageItems.map(item => {
+    const badgeMaq = item.isWash
+      ? `<span class="badge-machine badge-wash"><i class="fas fa-soap"></i> Lavadora</span>`
+      : `<span class="badge-machine badge-dry"><i class="fas fa-wind"></i> Secadora</span>`;
+    const apto = item.apartamento && item.apartamento !== 'Não Informado'
+      ? `<span class="cell-apto">${escapeHtml(item.apartamento)}</span>`
+      : `<span style="color:var(--text-dim);font-size:11px">–</span>`;
+    return `
+      <tr>
+        <td><strong>${item.dataStr}</strong></td>
+        <td style="color:var(--text-muted)">${item.horaStr}</td>
+        <td>${badgeMaq}${item.isNR ? `<span class="badge-nr" title="${item.nrMatch === 'incluida' ? 'Incluída a partir da planilha NR' : item.nrMatch ? 'Cruzada com a planilha NR' : 'NR no VendTEF (mola 25084/25085 ou produto NR)'}">NR${item.nrMatch === 'incluida' ? '+' : ''}</span><div style="font-size:10px;color:var(--text-dim);margin-top:3px">${escapeHtml(item.torre)}</div>` : ''}</td>
+        <td><span class="cell-morador">${escapeHtml(item.morador)}</span></td>
+        <td>${apto}</td>
+        <td style="font-family:'JetBrains Mono',monospace">${fmtBRL(item.valor)}</td>
+        <td><span class="badge-repasse-val">${fmtBRL(item.repasse)}</span></td>
+        <td><span style="font-size:11px;color:var(--text-muted)">${escapeHtml(item.pagamento)}</span></td>
+      </tr>`;
+  }).join('');
+  renderPagination(total);
+}
+
+function renderPagination(total) {
+  const info = document.getElementById('pagination-info');
+  const controls = document.getElementById('pagination-controls');
+  if (!total) { info.textContent = 'Nenhum registro para exibir'; controls.innerHTML = ''; return; }
+  const totalPages = Math.ceil(total / pageSize);
+  const start = (currentPage - 1) * pageSize + 1;
+  const end = Math.min(currentPage * pageSize, total);
+  info.textContent = `Mostrando ${fmtInt(start)} a ${fmtInt(end)} de ${fmtInt(total)} operações`;
+  let btns = `
+    <button class="btn-page" onclick="goToPage(1)" ${currentPage === 1 ? 'disabled' : ''}><i class="fas fa-angles-left"></i></button>
+    <button class="btn-page" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}><i class="fas fa-angle-left"></i></button>`;
+  for (let p = Math.max(1, currentPage - 2); p <= Math.min(totalPages, currentPage + 2); p++) {
+    btns += `<button class="btn-page ${p === currentPage ? 'active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+  }
+  btns += `
+    <button class="btn-page" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}><i class="fas fa-angle-right"></i></button>
+    <button class="btn-page" onclick="goToPage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}><i class="fas fa-angles-right"></i></button>`;
+  controls.innerHTML = btns;
+}
+
+function goToPage(page) {
+  currentPage = page;
+  renderAnalyticTable();
+  document.getElementById('analytic-table').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function nrLinhasNoPeriodo() {
+  const maqVal = document.getElementById('filter-maq-type').value;
+  const sd = fpStart && fpStart.selectedDates.length ? new Date(fpStart.selectedDates[0]) : null;
+  const ed = fpEnd && fpEnd.selectedDates.length ? new Date(fpEnd.selectedDates[0]) : null;
+  if (sd) sd.setHours(0, 0, 0, 0);
+  if (ed) ed.setHours(23, 59, 59, 999);
+  return nrConciliacao.linhas.filter(l => {
+    if (maqVal === 'wash' && !l.n.isWash) return false;
+    if (maqVal === 'dry' && l.n.isWash) return false;
+    if (sd && l.n.ts < sd.getTime()) return false;
+    if (ed && l.n.ts > ed.getTime()) return false;
+    return true;
+  });
+}
+
+function renderNRTable() {
+  const panel = document.getElementById('nr-panel');
+  panel.style.display = currentSegment === 'PUQ' ? 'none' : '';
+  if (currentSegment === 'PUQ') return;
+
+  const linhas = nrLinhasNoPeriodo();
+  const cnt = st => linhas.filter(l => l.status === st).length;
+  const ex = cnt('Casada (horário exato)'), ap = cnt('Casada (±2 min)'), inc = cnt('Incluída (sem par no VendTEF)');
+  const valor = linhas.reduce((s, l) => s + l.n.valor, 0);
+  const pct = linhas.length ? ((ex + ap) / linhas.length * 100).toFixed(1).replace('.', ',') : '0';
+  document.getElementById('nr-total-badge').textContent = `${fmtInt(linhas.length)} operações na planilha`;
+  document.getElementById('nr-stats').innerHTML = `
+    <div class="nr-stat"><div class="lbl">Operações NR (planilha)</div><div class="val">${fmtInt(linhas.length)}</div></div>
+    <div class="nr-stat"><div class="lbl">Casadas — horário exato</div><div class="val" style="color:#047857">${fmtInt(ex)}</div></div>
+    <div class="nr-stat"><div class="lbl">Casadas — até ±2 min</div><div class="val" style="color:#0369a1">${fmtInt(ap)}</div></div>
+    <div class="nr-stat"><div class="lbl">Incluídas (sem par)</div><div class="val" style="color:#b45309">${fmtInt(inc)}</div></div>
+    <div class="nr-stat"><div class="lbl">Taxa de cruzamento</div><div class="val">${pct}%</div></div>
+    <div class="nr-stat"><div class="lbl">Valor NR (planilha)</div><div class="val">${fmtBRL(valor)}</div></div>
+    ${nrConciliacao.offsetH ? `<div class="nr-stat"><div class="lbl">Ajuste de fuso aplicado</div><div class="val">${nrConciliacao.offsetH > 0 ? '+' : ''}${nrConciliacao.offsetH}h</div></div>` : ''}`;
+
+  const f = document.getElementById('nr-status-filter').value;
+  const vis = (f === 'all' ? linhas : linhas.filter(l => l.status === f)).slice().sort((a, b) => b.n.ts - a.n.ts);
+  const cls = st => st.startsWith('Casada (h') ? 'exato' : st.startsWith('Casada') ? 'aprox' : 'inc';
+  document.getElementById('nr-tbody').innerHTML = vis.length ? vis.map(l => {
+    const temPar = l.t && l.t.source !== 'Planilha NR';
+    const diff = temPar ? Math.round((l.t.timestamp - l.n.ts) / 1000 - nrConciliacao.offsetH * 3600) : null;
+    return `<tr>
+      <td><span class="nr-st ${cls(l.status)}">${l.status}</span></td>
+      <td><strong>${l.n.dataStr}</strong></td>
+      <td>${l.n.horaStr}</td>
+      <td style="color:var(--text-muted)">${temPar ? l.t.horaStr : '–'}</td>
+      <td style="color:var(--text-muted)">${diff === null ? '–' : (diff > 0 ? '+' : '') + diff}</td>
+      <td>${l.n.isWash ? '<span class="badge-machine badge-wash">Lavadora</span>' : '<span class="badge-machine badge-dry">Secadora</span>'}</td>
+      <td><span class="cell-morador">${escapeHtml(l.n.usuario || '–')}</span></td>
+      <td style="color:var(--text-muted)">${temPar ? escapeHtml(l.t.morador) : '–'}</td>
+      <td style="font-family:'JetBrains Mono',monospace">${fmtBRL(l.n.valor)}</td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--text-dim)">Nenhuma operação NR no período.</td></tr>`;
+}
+
+function exportNRExcel() {
+  const linhas = nrLinhasNoPeriodo().slice().sort((a, b) => a.n.ts - b.n.ts);
+  if (!linhas.length) { alert('Sem operações NR no período.'); return; }
+  const aoa = [['Status', 'Data', 'Hora planilha', 'Hora VendTEF', 'Diferença (seg)', 'Tipo', 'Usuário (planilha)', 'Morador (VendTEF)', 'Valor (R$)', 'Fonte no histórico']];
+  linhas.forEach(l => {
+    const temPar = l.t && l.t.source !== 'Planilha NR';
+    aoa.push([l.status, l.n.dataStr, l.n.horaStr, temPar ? l.t.horaStr : '', temPar ? Math.round((l.t.timestamp - l.n.ts) / 1000 - nrConciliacao.offsetH * 3600) : '',
+      l.n.isWash ? 'Lavadora NR' : 'Secadora NR', l.n.usuario, temPar ? l.t.morador : '', l.n.valor, l.t ? l.t.source : '']);
+  });
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{ wch: 30 }, { wch: 12 }, { wch: 13 }, { wch: 13 }, { wch: 15 }, { wch: 13 }, { wch: 26 }, { wch: 30 }, { wch: 11 }, { wch: 16 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Cruzamento NR');
+  XLSX.writeFile(wb, `cruzamento_nr_puq_perdizes_${new Date().toISOString().slice(0, 10)}.xlsx`);
+}
+
+// ══════════════════════════════════════════════════════
+// GRÁFICOS (tema claro)
+// ══════════════════════════════════════════════════════
+function renderTimelineChart(meses) {
+  const el = document.getElementById('chart-timeline');
+  const options = {
+    series: [
+      { name: 'Repasse (R$)', type: 'column', data: meses.map(m => +m.repasse.toFixed(2)) },
+      { name: 'Operações', type: 'line', data: meses.map(m => m.ops) }
+    ],
+    colors: ['#0ea5e9', '#6366f1'],
+    chart: { height: 330, type: 'line', toolbar: { show: false }, background: 'transparent', fontFamily: 'Plus Jakarta Sans, sans-serif' },
+    theme: { mode: 'light' },
+    stroke: { width: [0, 3], curve: 'smooth' },
+    markers: { size: [0, 4] },
+    plotOptions: { bar: { borderRadius: 5, columnWidth: meses.length > 14 ? '70%' : '45%' } },
+    dataLabels: { enabled: false },
+    xaxis: {
+      categories: meses.map(m => `${MESES_PT[m.month - 1]}/${String(m.year).slice(2)}`),
+      labels: { style: { colors: '#64748b', fontSize: '11px' } },
+      axisBorder: { color: '#e2e8f0' }, axisTicks: { color: '#e2e8f0' }
+    },
+    yaxis: [
+      { labels: { style: { colors: '#64748b' }, formatter: v => fmtBRL(v) } },
+      { opposite: true, labels: { style: { colors: '#64748b' }, formatter: v => fmtInt(Math.round(v)) } }
+    ],
+    legend: { position: 'top', horizontalAlign: 'right', labels: { colors: '#334155' } },
+    tooltip: { theme: 'light', shared: true, intersect: false,
+      y: { formatter: (v, { seriesIndex }) => seriesIndex === 0 ? fmtBRL(v) : `${fmtInt(v)} operações` } },
+    grid: { borderColor: '#eef2f7', strokeDashArray: 4 },
+    noData: { text: 'Sem dados no período' }
+  };
+  if (chartTimeline) chartTimeline.destroy();
+  chartTimeline = new ApexCharts(el, options);
+  chartTimeline.render();
+}
+
+function renderMixChart(wash, dry) {
+  const el = document.getElementById('chart-mix');
+  const options = {
+    series: [wash, dry],
+    labels: ['Lavagens', 'Secagens'],
+    colors: ['#2563eb', '#db2777'],
+    chart: { type: 'donut', height: 330, background: 'transparent', fontFamily: 'Plus Jakarta Sans, sans-serif' },
+    theme: { mode: 'light' },
+    plotOptions: { pie: { donut: { size: '66%', labels: { show: true,
+      value: { formatter: v => fmtInt(+v) },
+      total: { show: true, label: 'Operações', color: '#64748b', formatter: () => fmtInt(wash + dry) } } } } },
+    dataLabels: { enabled: true, formatter: v => `${v.toFixed(0)}%` },
+    stroke: { colors: ['#ffffff'] },
+    legend: { position: 'bottom', labels: { colors: '#334155' } },
+    tooltip: { theme: 'light', y: { formatter: v => `${fmtInt(v)} operações` } }
+  };
+  if (chartMix) chartMix.destroy();
+  chartMix = new ApexCharts(el, options);
+  chartMix.render();
+}
+
+// ══════════════════════════════════════════════════════
+// EXPORTAÇÃO EXCEL
+// ══════════════════════════════════════════════════════
+function exportRelatorioExcel() {
+  if (!periodTransactions.length) { alert('Não há dados para exportar no período selecionado.'); return; }
+  const wb = XLSX.utils.book_new();
+
+  const meses = groupByMonth(periodTransactions);
+  const mensal = [['Mês', 'Lavagens', 'Secagens', 'Operações', 'Faturamento Bruto (R$)', 'Repasse (R$)']];
+  meses.forEach(m => mensal.push([`${String(m.month).padStart(2, '0')}/${m.year}`, m.wash, m.dry, m.ops, +m.fat.toFixed(2), +m.repasse.toFixed(2)]));
+  const t = meses.reduce((a, m) => [a[0] + m.wash, a[1] + m.dry, a[2] + m.ops, a[3] + m.fat, a[4] + m.repasse], [0, 0, 0, 0, 0]);
+  mensal.push(['TOTAL', t[0], t[1], t[2], +t[3].toFixed(2), +t[4].toFixed(2)]);
+  const wsM = XLSX.utils.aoa_to_sheet(mensal);
+  wsM['!cols'] = [{ wch: 12 }, { wch: 11 }, { wch: 11 }, { wch: 12 }, { wch: 24 }, { wch: 16 }];
+  XLSX.utils.book_append_sheet(wb, wsM, 'Histórico Mensal');
+
+  const ex = [['Data', 'Hora', 'Segmento', 'Tipo de Máquina', 'Morador', 'Apartamento', 'Valor (R$)', 'Repasse (R$)', 'Pagamento']];
+  periodTransactions.forEach(i => ex.push([i.dataStr, i.horaStr, i.isNR ? 'NR' : 'PUQ Perdizes', i.tipoMaquina, i.morador, i.apartamento, i.valor, i.repasse, i.pagamento]));
+  const wsE = XLSX.utils.aoa_to_sheet(ex);
+  wsE['!cols'] = [{ wch: 12 }, { wch: 10 }, { wch: 14 }, { wch: 16 }, { wch: 34 }, { wch: 16 }, { wch: 12 }, { wch: 13 }, { wch: 18 }];
+  XLSX.utils.book_append_sheet(wb, wsE, 'Extrato');
+
+  XLSX.writeFile(wb, `relatorio_${SEG_INFO[currentSegment].arquivo}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+}
+
+document.addEventListener('DOMContentLoaded', initDashboard);
+
+</script>
+</body>
+</html>
