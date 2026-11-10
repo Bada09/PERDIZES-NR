@@ -1120,8 +1120,8 @@ const MOLA_TIPO_MAP = {
   '25005': 'dry',
   '25006': 'wash',
   '25007': 'dry',
-  '25084': 'wash',
-  '25085': 'dry',
+  '25084': 'dry',
+  '25085': 'wash',
   '25343': 'wash',
   '25344': 'dry',
   '25345': 'wash',
@@ -1573,13 +1573,26 @@ function conciliarNR() {
 // Operações NR: identificadas pelo sufixo "NR" no produto (ex.: "Lavadora NR", "Secadora NR")
 // Molas exclusivas do NR no PUQ Perdizes
 const MOLAS_NR = {
-  '25084': { torre: 'NR - Lavadora 1', isWash: true },
-  '25085': { torre: 'NR - Secadora 1', isWash: false }
+  '25085': { torre: 'NR - Lavadora 1', isWash: true },
+  '25084': { torre: 'NR - Secadora 1', isWash: false }
 };
 function molaCode(r) { return String(r[6] || '').trim().split(/\s+/)[0]; }
+// A partir de 01/05/2026 o NR passa a usar também estas molas
+const MOLAS_NR_MAIO = {
+  '25474': { torre: 'NR - Lavadora 1', isWash: true },
+  '25344': { torre: 'NR - Secadora 1', isWash: false }
+};
+const NR_MAIO_INICIO = new Date(2026, 4, 1); // 01/05/2026
+// Retorna info da mola NR válida para a data da operação (ou undefined)
+function molaNRInfo(r, dt) {
+  const c = molaCode(r);
+  if (MOLAS_NR[c]) return MOLAS_NR[c];
+  if (MOLAS_NR_MAIO[c] && dt && dt >= NR_MAIO_INICIO) return MOLAS_NR_MAIO[c];
+  return undefined;
+}
 
-function isNRRow(r) {
-  if (MOLAS_NR[molaCode(r)]) return true;
+function isNRRow(r, dt) {
+  if (molaNRInfo(r, dt)) return true;
   const campos = [r[5], r[1], r[6]];
   return campos.some(c => /(^|[\s\-_/])NR($|[\s\-_/])/i.test(String(c || '').trim()));
 }
@@ -1624,7 +1637,7 @@ function processSourceRows(rows, sourceName) {
       maquina.includes('perdizes') || 
       maquina.includes('puq') ||
       maquina.includes('31#') ||
-      MOLAS_NR[molaCode(r)]
+      molaNRInfo(r, dt)
     ) {
       condoKey = 'PUQ_PERDIZES';
       condoNome = 'PUQ Perdizes';
@@ -1633,8 +1646,8 @@ function processSourceRows(rows, sourceName) {
     if (!condoKey) continue;
 
     const maqInfo = detectMachineType(r);
-    const isNR = isNRRow(r);
-    const molaNR = MOLAS_NR[molaCode(r)];
+    const isNR = isNRRow(r, dt);
+    const molaNR = molaNRInfo(r, dt);
     if (molaNR) { maqInfo.isWash = molaNR.isWash; maqInfo.type = molaNR.isWash ? 'Lavadora' : 'Secadora'; }
     const residentInfo = extractResidentAndApt(r[19], r[14], condoKey);
     const valor = parseNumber(r[9] || r[7] || 0);
@@ -1654,7 +1667,7 @@ function processSourceRows(rows, sourceName) {
       month: dt.getMonth() + 1,
       tipoMaquina: maqInfo.type,
       isWash: maqInfo.isWash,
-      torre: (MOLAS_NR[molaCode(r)] || {}).torre || maqInfo.torre || (condoKey === 'PUQ_PERDIZES' ? 'Torre PUQ' : 'You Go'),
+      torre: (molaNRInfo(r, dt) || {}).torre || maqInfo.torre || (condoKey === 'PUQ_PERDIZES' ? 'Torre PUQ' : 'You Go'),
       morador: residentInfo.name,
       apartamento: residentInfo.apt,
       valor,
@@ -1937,7 +1950,7 @@ function renderAnalyticTable() {
       <tr>
         <td><strong>${item.dataStr}</strong></td>
         <td style="color:var(--text-muted)">${item.horaStr}</td>
-        <td>${badgeMaq}${item.isNR ? `<span class="badge-nr" title="${item.nrMatch === 'incluida' ? 'Incluída a partir da planilha NR' : item.nrMatch ? 'Cruzada com a planilha NR' : 'NR no VendTEF (mola 25084/25085 ou produto NR)'}">NR${item.nrMatch === 'incluida' ? '+' : ''}</span><div style="font-size:10px;color:var(--text-dim);margin-top:3px">${escapeHtml(item.torre)}</div>` : ''}</td>
+        <td>${badgeMaq}${item.isNR ? `<span class="badge-nr" title="${item.nrMatch === 'incluida' ? 'Incluída a partir da planilha NR' : item.nrMatch ? 'Cruzada com a planilha NR' : 'NR no VendTEF (mola 25084 = secadora / 25085 = lavadora, ou produto NR)'}">NR${item.nrMatch === 'incluida' ? '+' : ''}</span><div style="font-size:10px;color:var(--text-dim);margin-top:3px">${escapeHtml(item.torre)}</div>` : ''}</td>
         <td><span class="cell-morador">${escapeHtml(item.morador)}</span></td>
         <td>${apto}</td>
         <td style="font-family:'JetBrains Mono',monospace">${fmtBRL(item.valor)}</td>
